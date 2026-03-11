@@ -111,49 +111,253 @@ realmforge/
 
 ---
 
-## Deployment
+## Deployment (cPanel Shared Hosting)
 
-### Requirements
+> These instructions assume a standard cPanel shared-hosting account with Apache
+> and PHP 8.0+. No Composer, Node.js, or SSH root access is required.
 
-- PHP 8.0+ with `curl` extension enabled
-- Apache with `mod_rewrite`
-- Write permissions on `images/generated/` and `logs/`
+### Prerequisites
 
-### Steps
+| Requirement | Where to check in cPanel |
+|---|---|
+| **PHP 8.0+** with the `curl` extension | *MultiPHP Manager* or *Select PHP Version* |
+| **Apache** with `mod_rewrite` enabled | Enabled by default on most hosts |
+| A registered **domain or subdomain** | *Domains* → *Subdomains* / *Addon Domains* |
+| **(Optional) MySQL / MariaDB** database | *MySQL® Databases* |
 
-1. **Clone or upload** the repository to your cPanel hosting account.
+> **Tip:** If your host offers both PHP 8.x versions, pick the latest stable
+> release (e.g. 8.2). RealmForge has no Composer dependencies, so upgrades are
+> painless.
 
-   ```bash
-   git clone https://github.com/hostyorkshire/realmforge.git
+---
+
+### Step 1 – Upload the Files
+
+Choose **one** of the three methods below.
+
+#### Option A – cPanel File Manager (no SSH needed)
+
+1. Download the repository as a ZIP from GitHub:
+   `https://github.com/hostyorkshire/realmforge/archive/refs/heads/main.zip`
+2. In cPanel, open **File Manager** → navigate to your home directory (usually `/home/<user>/`).
+3. Click **Upload** → select the ZIP file → wait for the upload to finish.
+4. Select the uploaded ZIP → click **Extract** → extract into your home directory.
+5. Rename the extracted folder (e.g. `realmforge-main`) to `realmforge`.
+
+#### Option B – cPanel Terminal / SSH
+
+If your host enables **Terminal** (cPanel → *Advanced* → *Terminal*):
+
+```bash
+cd ~
+git clone https://github.com/hostyorkshire/realmforge.git
+```
+
+#### Option C – FTP / SFTP
+
+Upload the repository contents with an FTP client such as FileZilla:
+
+- **Host:** your server hostname (see cPanel → *FTP Accounts*)
+- **Remote path:** `/home/<user>/realmforge/`
+
+> **Tip:** Whichever method you use, the final path should look like
+> `/home/<user>/realmforge/` with `config.php`, `public/`, `api/`, etc. directly
+> inside it.
+
+---
+
+### Step 2 – Select the Correct PHP Version
+
+1. In cPanel, open **MultiPHP Manager** (or **Select PHP Version** on CloudLinux hosts).
+2. Locate your domain in the list and set the PHP version to **8.0** or higher.
+3. If your host offers a **PHP Extensions** page, confirm that the **curl** extension is enabled.
+
+> **Why curl?** RealmForge calls the Groq and Stability AI APIs from the server
+> side using PHP's `curl_*` functions.
+
+---
+
+### Step 3 – Point Your Domain to the `/public` Directory
+
+The game's front-end files (`index.html`, `style.css`, `app.js`) live in
+`realmforge/public/`. Your domain's document root must point there so that
+`config.php`, `engine/`, and `api/` stay **outside** the web root for security.
+
+1. In cPanel, go to **Domains** (or **Addon Domains** / **Subdomains**).
+2. Edit the domain you want to use (e.g. `playrealmforge.co.uk`).
+3. Set **Document Root** to:
+
+   ```
+   /home/<user>/realmforge/public
    ```
 
-2. **Configure API keys** in `config.php`:
+4. Save the change.
+
+> **Tip:** If you cannot change the document root (some hosts lock it to
+> `public_html`), you can create a symbolic link instead:
+>
+> ```bash
+> # In cPanel Terminal – remove default public_html content first
+> rm -rf /home/<user>/public_html
+> ln -s /home/<user>/realmforge/public /home/<user>/public_html
+> ```
+>
+> Or move the contents of `public/` into `public_html/` and adjust paths in
+> `config.php` accordingly.
+
+---
+
+### Step 4 – Configure API Keys
+
+1. In **File Manager**, navigate to `/home/<user>/realmforge/` and open `config.php` for editing.
+2. Replace the placeholder values with your real keys:
 
    ```php
-   define('GROQ_API_KEY', 'your-actual-groq-api-key');
-   define('STABLE_DIFFUSION_API_KEY', 'your-actual-sd-api-key');
+   define('GROQ_API_KEY', 'gsk_YourActualGroqKeyHere');
+   define('STABLE_DIFFUSION_API_KEY', 'sk-YourActualStabilityKeyHere');
    ```
 
-3. **Set write permissions** on cache directories:
+3. While you're in the file, change the default admin credentials:
 
-   ```bash
-   chmod -R 755 images/generated/
-   chmod -R 755 logs/
+   ```php
+   define('ADMIN_USER', 'myadmin');
+   define('ADMIN_PASS', 'a-strong-random-password');
    ```
 
-4. **Point your domain** (`playrealmforge.co.uk`) to the `/public` directory in your cPanel document root settings.
+4. For production, confirm these two lines are set (they are by default):
 
-5. **Set up admin authentication.** Edit `admin/.htaccess` to point `AuthUserFile` to a valid `.htpasswd` file, then create it:
-
-   ```bash
-   htpasswd -c /etc/realmforge/.htpasswd admin
+   ```php
+   ini_set('display_errors', 0);   // hide errors from visitors
+   ini_set('log_errors', 1);       // write errors to logs/errors.log
    ```
 
-6. **Optional – MySQL save games.** Import `database/schema.sql` into a MySQL database and add the connection credentials to `config.php`.
+5. **Save** the file.
 
-7. **Visit** `https://playrealmforge.co.uk` and begin your adventure!
+> **Security:** `config.php` sits *outside* the public document root, so
+> visitors cannot access it directly. Never move it into `public/`.
 
-8. On first load, the world is automatically generated and saved to `database/world.json`.
+---
+
+### Step 5 – Set Directory Permissions
+
+RealmForge needs to write AI-generated images and log files at runtime.
+
+**Via cPanel File Manager:**
+
+1. Navigate to `/home/<user>/realmforge/`.
+2. Right-click the `images` folder → **Change Permissions** → set to **`0755`** → check **Recurse into subdirectories**.
+3. Repeat for the `logs` folder.
+4. Repeat for the `database` folder (the engine writes `world.json` here on first run).
+
+**Via Terminal:**
+
+```bash
+cd ~/realmforge
+chmod -R 755 images/generated/
+chmod -R 755 logs/
+chmod -R 755 database/
+```
+
+> **Tip:** Some hosts run PHP via CGI/FastCGI under your own user account, so
+> `755` is sufficient. If images still fail to save, try `775`. Avoid `777` in
+> production.
+
+---
+
+### Step 6 – Protect the Admin Dashboard
+
+The admin area at `/admin/dashboard.php` is protected by HTTP Basic Auth via
+`admin/.htaccess`. You need to create a `.htpasswd` file and update the path.
+
+**Via cPanel Terminal:**
+
+```bash
+# Create the password file (you will be prompted for a password)
+mkdir -p ~/realmforge/.htpassfiles
+htpasswd -c ~/realmforge/.htpassfiles/.htpasswd admin
+
+# To add more users later, omit the -c flag (it overwrites the file):
+# htpasswd ~/realmforge/.htpassfiles/.htpasswd anotheruser
+```
+
+Then edit `admin/.htaccess` in File Manager and update the `AuthUserFile` line:
+
+```apache
+AuthUserFile /home/<user>/realmforge/.htpassfiles/.htpasswd
+```
+
+**Via cPanel's "Directory Privacy" tool:**
+
+1. In cPanel, go to **Directory Privacy** (under *Security*).
+2. Navigate to `realmforge/admin/`.
+3. Check **Password protect this directory**, give it a label, and save.
+4. Add a user with a strong password.
+
+> **Tip:** The "Directory Privacy" method automatically generates the
+> `.htaccess` and `.htpasswd` entries for you—no command line needed.
+
+---
+
+### Step 7 – (Optional) Set Up MySQL for Save Games
+
+RealmForge works entirely with JSON files by default. If you want persistent
+database-backed save games:
+
+1. In cPanel, open **MySQL® Databases**.
+2. Create a new database (e.g. `<user>_realmforge`).
+3. Create a new database user and assign it **ALL PRIVILEGES** on that database.
+4. Open **phpMyAdmin** (cPanel → *Databases* → *phpMyAdmin*).
+5. Select your new database in the left sidebar.
+6. Click the **Import** tab → choose `database/schema.sql` from your local machine → click **Go**.
+7. Add the connection details to `config.php`:
+
+   ```php
+   define('DB_HOST', 'localhost');
+   define('DB_NAME', '<user>_realmforge');
+   define('DB_USER', '<user>_rfuser');
+   define('DB_PASS', 'your-db-password');
+   ```
+
+> **Tip:** On most cPanel hosts the database name and user are prefixed with
+> your cPanel username (e.g. `cpuser_realmforge`). Use the exact names shown in
+> the MySQL Databases screen.
+
+---
+
+### Step 8 – Verify the Installation
+
+1. **Visit your domain** (e.g. `https://playrealmforge.co.uk`).
+   - You should see the RealmForge game interface with the "Your adventure begins…" placeholder.
+2. **Click an action** or type a custom command. If Groq is configured correctly you will receive an AI-narrated response within a few seconds.
+3. **Check image generation.** Scene art should appear above the story text after a short delay. If it does not, verify your Stability AI key and that `images/generated/` is writable.
+4. On **first load** the world is automatically generated and saved to `database/world.json`. This may take a moment.
+5. **Visit the admin dashboard** at `https://playrealmforge.co.uk/admin/dashboard.php` and log in with the credentials you configured.
+
+---
+
+### Troubleshooting
+
+| Symptom | Likely cause | Fix |
+|---|---|---|
+| **500 Internal Server Error** | PHP version too low or `mod_rewrite` disabled | Set PHP to 8.0+ in *MultiPHP Manager*; check `.htaccess` syntax |
+| **Blank page / white screen** | PHP fatal error hidden by `display_errors 0` | Check `logs/errors.log` or temporarily set `display_errors` to `1` in `config.php` |
+| **"Failed to connect to api.groq.com"** | `curl` extension not enabled | Enable `curl` in *Select PHP Version* → *Extensions* |
+| **Images not appearing** | `images/generated/` not writable | Re-check permissions (step 5); look for errors in `logs/errors.log` |
+| **Admin page shows "401 Unauthorized"** | `.htpasswd` path wrong in `admin/.htaccess` | Run `realpath ~/realmforge/.htpassfiles/.htpasswd` in Terminal to get the correct absolute path |
+| **World not generating** | `database/` directory not writable | `chmod 755 database/` or set permissions in File Manager |
+| **API rate-limit errors** | Too many requests to Groq / Stability AI | Wait a minute and try again; check your plan's rate limits |
+
+### Security Tips
+
+- **Keep `config.php` outside the document root.** The recommended directory
+  layout already does this—`public/` is the only folder exposed to the web.
+- **Use HTTPS.** Enable a free SSL certificate via cPanel → *SSL/TLS Status*
+  or *Let's Encrypt™* and force HTTPS in `public/.htaccess`.
+- **Restrict `admin/` access** to your own IP address if possible by adding
+  `Require ip <your-ip>` to `admin/.htaccess`.
+- **Change the default admin password** in `config.php` before going live.
+- **Disable directory listing** by ensuring `Options -Indexes` is present in
+  your root `.htaccess` (or `public/.htaccess`).
 
 ---
 
