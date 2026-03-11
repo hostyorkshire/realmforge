@@ -3,8 +3,8 @@
  * Admin – Quest Manager
  */
 
-require_once __DIR__ . '/../config.php';
-require_once __DIR__ . '/../engine/quests.php';
+require_once __DIR__ . '/../../config.php';
+require_once __DIR__ . '/../../engine/quests.php';
 
 $quests = getAllQuests();
 ?>

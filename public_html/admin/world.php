@@ -3,14 +3,14 @@
  * Admin – World Viewer
  */
 
-require_once __DIR__ . '/../config.php';
-require_once __DIR__ . '/../engine/world.php';
+require_once __DIR__ . '/../../config.php';
+require_once __DIR__ . '/../../engine/world.php';
 
 $world = loadWorld();
 
 // Regenerate if requested
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['regenerate'])) {
-    require_once __DIR__ . '/../engine/continentGenerator.php';
+    require_once __DIR__ . '/../../engine/continentGenerator.php';
     $world = generateWorld();
     header('Location: world.php');
     exit;

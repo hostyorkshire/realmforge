@@ -4,9 +4,9 @@
  * Generates or returns the world map.
  */
 
-require_once __DIR__ . '/../config.php';
-require_once __DIR__ . '/../engine/continentGenerator.php';
-require_once __DIR__ . '/../engine/world.php';
+require_once __DIR__ . '/../../config.php';
+require_once __DIR__ . '/../../engine/continentGenerator.php';
+require_once __DIR__ . '/../../engine/world.php';
 
 header('Content-Type: application/json');
 header('X-Content-Type-Options: nosniff');

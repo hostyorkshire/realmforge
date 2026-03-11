@@ -4,8 +4,8 @@
  * Generates or returns cached images using Stable Diffusion.
  */
 
-require_once __DIR__ . '/../config.php';
-require_once __DIR__ . '/../engine/imagePrompts.php';
+require_once __DIR__ . '/../../config.php';
+require_once __DIR__ . '/../../engine/imagePrompts.php';
 
 header('Content-Type: application/json');
 header('X-Content-Type-Options: nosniff');

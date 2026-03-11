@@ -3,7 +3,6 @@ deployment:
   tasks:
     # ── Runtime directories above public_html (not web-accessible) ─────────────
     - /bin/mkdir -p /home/playrealm/logs
-    - /bin/mkdir -p /home/playrealm/database
 
     # ── Image cache directories inside public_html (must be web-accessible) ────
     - /bin/mkdir -p /home/playrealm/public_html/images/generated/scenes
@@ -24,4 +23,4 @@ deployment:
     # and replace DB_USER, DB_PASS, and DB_NAME with your cPanel MySQL
     # credentials to have the database updated automatically on every deploy.
     #
-    # - /usr/bin/mysql -u DB_USER -p"DB_PASS" DB_NAME < /home/playrealm/public_html/database/schema.sql
+    # - /usr/bin/mysql -u DB_USER -p"DB_PASS" DB_NAME < /home/playrealm/database/schema.sql

@@ -3,8 +3,8 @@
  * Admin – NPC Manager
  */
 
-require_once __DIR__ . '/../config.php';
-require_once __DIR__ . '/../engine/npcs.php';
+require_once __DIR__ . '/../../config.php';
+require_once __DIR__ . '/../../engine/npcs.php';
 
 $npcs = getAllNpcs();
 ?>

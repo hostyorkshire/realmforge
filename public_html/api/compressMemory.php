@@ -4,8 +4,8 @@
  * Compresses player history into a story summary.
  */
 
-require_once __DIR__ . '/../config.php';
-require_once __DIR__ . '/../engine/memory.php';
+require_once __DIR__ . '/../../config.php';
+require_once __DIR__ . '/../../engine/memory.php';
 
 header('Content-Type: application/json');
 header('X-Content-Type-Options: nosniff');

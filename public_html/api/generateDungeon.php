@@ -4,8 +4,8 @@
  * Returns a procedurally generated dungeon layout.
  */
 
-require_once __DIR__ . '/../config.php';
-require_once __DIR__ . '/../engine/dungeons.php';
+require_once __DIR__ . '/../../config.php';
+require_once __DIR__ . '/../../engine/dungeons.php';
 
 header('Content-Type: application/json');
 header('X-Content-Type-Options: nosniff');

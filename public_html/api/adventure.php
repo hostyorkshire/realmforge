@@ -4,13 +4,13 @@
  * Receives a player action and returns an AI-narrated story response with choices.
  */
 
-require_once __DIR__ . '/../config.php';
-require_once __DIR__ . '/../engine/parser.php';
-require_once __DIR__ . '/../engine/gameMasterPrompt.php';
-require_once __DIR__ . '/../engine/history.php';
-require_once __DIR__ . '/../engine/memory.php';
-require_once __DIR__ . '/../engine/combat.php';
-require_once __DIR__ . '/../engine/dice.php';
+require_once __DIR__ . '/../../config.php';
+require_once __DIR__ . '/../../engine/parser.php';
+require_once __DIR__ . '/../../engine/gameMasterPrompt.php';
+require_once __DIR__ . '/../../engine/history.php';
+require_once __DIR__ . '/../../engine/memory.php';
+require_once __DIR__ . '/../../engine/combat.php';
+require_once __DIR__ . '/../../engine/dice.php';
 
 header('Content-Type: application/json');
 header('X-Content-Type-Options: nosniff');
