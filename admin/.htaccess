@@ -1,6 +1,5 @@
 AuthType Basic
 AuthName "RealmForge Admin"
-# Update this path to match your server's .htpasswd location.
-# Create the file with: htpasswd -c /path/to/.htpasswd admin
-AuthUserFile /etc/realmforge/.htpasswd
+# Path to the .htpasswd file created during setup (see README – Step 6).
+AuthUserFile /home/playrealm/.htpassfiles/.htpasswd
 Require valid-user

@@ -1,25 +1,27 @@
 ---
 deployment:
   tasks:
-    # Ensure runtime directories exist
-    - /bin/mkdir -p images/generated/scenes
-    - /bin/mkdir -p images/generated/npcs
-    - /bin/mkdir -p images/generated/monsters
-    - /bin/mkdir -p images/generated/items
-    - /bin/mkdir -p images/generated/towns
-    - /bin/mkdir -p images/generated/dungeons
-    - /bin/mkdir -p images/generated/maps
-    - /bin/mkdir -p logs
-    - /bin/mkdir -p database
+    # ── Runtime directories above public_html (not web-accessible) ─────────────
+    - /bin/mkdir -p /home/playrealm/logs
+    - /bin/mkdir -p /home/playrealm/database
 
-    # Set writable permissions for runtime directories
-    - /bin/chmod -R 755 images/generated
-    - /bin/chmod -R 755 logs
-    - /bin/chmod -R 755 database
+    # ── Image cache directories inside public_html (must be web-accessible) ────
+    - /bin/mkdir -p /home/playrealm/public_html/images/generated/scenes
+    - /bin/mkdir -p /home/playrealm/public_html/images/generated/npcs
+    - /bin/mkdir -p /home/playrealm/public_html/images/generated/monsters
+    - /bin/mkdir -p /home/playrealm/public_html/images/generated/items
+    - /bin/mkdir -p /home/playrealm/public_html/images/generated/towns
+    - /bin/mkdir -p /home/playrealm/public_html/images/generated/dungeons
+    - /bin/mkdir -p /home/playrealm/public_html/images/generated/maps
+
+    # ── Writable permissions ────────────────────────────────────────────────────
+    - /bin/chmod -R 755 /home/playrealm/public_html/images/generated
+    - /bin/chmod -R 755 /home/playrealm/logs
+    - /bin/chmod -R 755 /home/playrealm/database
 
     # Optional – import / update the MySQL schema (safe to re-run because
     # the SQL uses CREATE TABLE IF NOT EXISTS). Uncomment the line below
     # and replace DB_USER, DB_PASS, and DB_NAME with your cPanel MySQL
     # credentials to have the database updated automatically on every deploy.
     #
-    # - /usr/bin/mysql -u DB_USER -p"DB_PASS" DB_NAME < database/schema.sql
+    # - /usr/bin/mysql -u DB_USER -p"DB_PASS" DB_NAME < /home/playrealm/public_html/database/schema.sql

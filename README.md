@@ -21,77 +21,62 @@ RealmForge is a browser-based dark-fantasy RPG where an AI Game Master narrates 
 
 ---
 
-## Folder Structure
+## On-Server Directory Layout
+
+The repository is cloned directly into `public_html/` (the cPanel web root).
+Write-needed runtime directories sit **above** `public_html/` so they are never
+reachable via HTTP. The root `.htaccess` blocks direct access to every sensitive
+path inside `public_html/`.
 
 ```
-realmforge/
-├── .cpanel.yml              # cPanel Git deployment tasks
-├── .github/workflows/
-│   └── deploy.yml           # GitHub Actions → cPanel auto-deploy
-├── config.php               # API keys and global constants
-├── README.md
-├── PROJECT_BRIEF.md
+/home/playrealm/
 │
-├── api/                     # JSON API endpoints
-│   ├── adventure.php        # Main game loop (action → AI narration)
-│   ├── generateImage.php    # Image generation with caching
-│   ├── npcDialogue.php      # Contextual NPC conversation
-│   ├── compressMemory.php   # Story memory compression
-│   ├── generateDungeon.php  # Procedural dungeon rooms
-│   └── generateWorld.php    # World generation / retrieval
+├── public_html/                  ← web root / git repository
+│   ├── .htaccess                 # Security rules – blocks config, engine, database, dotfiles
+│   ├── .cpanel.yml               # cPanel Git deployment tasks
+│   ├── .github/workflows/
+│   │   └── deploy.yml            # GitHub Actions → cPanel auto-deploy
+│   ├── config.php                # API keys – blocked by .htaccess
+│   │
+│   ├── api/                      # JSON API endpoints (web-accessible PHP)
+│   │   ├── adventure.php         # Main game loop (action → AI narration)
+│   │   ├── generateImage.php     # Image generation with caching
+│   │   ├── npcDialogue.php       # Contextual NPC conversation
+│   │   ├── compressMemory.php    # Story memory compression
+│   │   ├── generateDungeon.php   # Procedural dungeon rooms
+│   │   └── generateWorld.php     # World generation / retrieval
+│   │
+│   ├── engine/                   # PHP game engine – blocked by .htaccess
+│   │   └── *.php
+│   │
+│   ├── database/                 # schema.sql only – blocked by .htaccess
+│   │   └── schema.sql
+│   │
+│   ├── public/                   # Game frontend – served at /public/
+│   │   ├── index.html
+│   │   ├── style.css
+│   │   └── app.js
+│   │
+│   ├── admin/                    # Password-protected admin area
+│   │   ├── .htaccess
+│   │   └── *.php
+│   │
+│   └── images/generated/         # Stable Diffusion cache – web-accessible
+│       ├── scenes/
+│       ├── npcs/
+│       ├── monsters/
+│       ├── items/
+│       ├── towns/
+│       ├── dungeons/
+│       └── maps/
 │
-├── engine/                  # Pure PHP game engine (no HTTP)
-│   ├── continentGenerator.php
-│   ├── world.php
-│   ├── towns.php
-│   ├── dungeons.php
-│   ├── inventory.php
-│   ├── combat.php
-│   ├── dice.php
-│   ├── quests.php
-│   ├── npcs.php
-│   ├── shops.php
-│   ├── history.php
-│   ├── memory.php
-│   ├── factions.php
-│   ├── lore.php
-│   ├── imagePrompts.php
-│   ├── gameMasterPrompt.php
-│   └── parser.php
-│
-├── public/                  # Apache document root
-│   ├── index.html
-│   ├── style.css
-│   └── app.js
-│
-├── admin/                   # Password-protected admin area
-│   ├── .htaccess
-│   ├── dashboard.php
-│   ├── logs.php
-│   ├── quests.php
-│   ├── npcs.php
-│   ├── factions.php
-│   ├── lore.php
-│   ├── images.php
-│   └── world.php
-│
-├── images/generated/        # Stable Diffusion output cache
-│   ├── scenes/
-│   ├── npcs/
-│   ├── monsters/
-│   ├── items/
-│   ├── towns/
-│   ├── dungeons/
-│   └── maps/
-│
-├── logs/
+├── logs/                         ← above public_html – never web-accessible
 │   ├── ai_requests.log
 │   ├── player_actions.log
 │   └── errors.log
 │
-└── database/
-    ├── schema.sql           # Optional MySQL schema
-    └── world.json           # Generated world data
+└── database/                     ← above public_html – never web-accessible
+    └── world.json                # Generated world data (written at runtime)
 ```
 
 ---
@@ -116,8 +101,9 @@ realmforge/
 
 ## Deployment (cPanel Shared Hosting)
 
-> These instructions assume a standard cPanel shared-hosting account with Apache
-> and PHP 8.0+. No Composer, Node.js, or SSH root access is required.
+> These instructions assume the cPanel account username **`playrealm`** with the
+> default document root `/home/playrealm/public_html/` and Apache + PHP 8.0+.
+> No Composer, Node.js, or SSH root access is required.
 
 ### Prerequisites
 
@@ -142,18 +128,21 @@ Choose **one** of the three methods below.
 
 1. Download the repository as a ZIP from GitHub:
    `https://github.com/hostyorkshire/realmforge/archive/refs/heads/main.zip`
-2. In cPanel, open **File Manager** → navigate to your home directory (usually `/home/<user>/`).
+2. In cPanel, open **File Manager** → navigate to `/home/playrealm/public_html/`.
 3. Click **Upload** → select the ZIP file → wait for the upload to finish.
-4. Select the uploaded ZIP → click **Extract** → extract into your home directory.
-5. Rename the extracted folder (e.g. `realmforge-main`) to `realmforge`.
+4. Select the uploaded ZIP → click **Extract** → extract into `public_html/`.
+5. If the ZIP extracts into a subdirectory (e.g. `realmforge-main/`), move all
+   files one level up so that `config.php`, `public/`, `api/`, etc. are directly
+   inside `public_html/`.
 
 #### Option B – cPanel Terminal / SSH
 
 If your host enables **Terminal** (cPanel → *Advanced* → *Terminal*):
 
 ```bash
-cd ~
-git clone https://github.com/hostyorkshire/realmforge.git
+# Clone into public_html directly (the . means "current directory, not a subfolder")
+cd ~/public_html
+git clone https://github.com/hostyorkshire/realmforge.git .
 ```
 
 #### Option C – FTP / SFTP
@@ -161,11 +150,10 @@ git clone https://github.com/hostyorkshire/realmforge.git
 Upload the repository contents with an FTP client such as FileZilla:
 
 - **Host:** your server hostname (see cPanel → *FTP Accounts*)
-- **Remote path:** `/home/<user>/realmforge/`
+- **Remote path:** `/home/playrealm/public_html/`
 
-> **Tip:** Whichever method you use, the final path should look like
-> `/home/<user>/realmforge/` with `config.php`, `public/`, `api/`, etc. directly
-> inside it.
+> **Tip:** Whichever method you use, the final result should have `config.php`,
+> `public/`, `api/`, etc. directly inside `/home/playrealm/public_html/`.
 
 ---
 
@@ -180,39 +168,39 @@ Upload the repository contents with an FTP client such as FileZilla:
 
 ---
 
-### Step 3 – Point Your Domain to the `/public` Directory
+### Step 3 – Document Root and Security (.htaccess)
 
-The game's front-end files (`index.html`, `style.css`, `app.js`) live in
-`realmforge/public/`. Your domain's document root must point there so that
-`config.php`, `engine/`, and `api/` stay **outside** the web root for security.
+The repository root (`/home/playrealm/public_html/`) **is** the cPanel default
+document root, so no domain reconfiguration is needed.
 
-1. In cPanel, go to **Domains** (or **Addon Domains** / **Subdomains**).
-2. Edit the domain you want to use (e.g. `playrealmforge.co.uk`).
-3. Set **Document Root** to:
+The included `.htaccess` file at the repository root handles two things
+automatically:
 
-   ```
-   /home/<user>/realmforge/public
-   ```
+1. **Security** – blocks direct HTTP access to files and directories that should
+   never be reachable from a browser:
 
-4. Save the change.
+   | Blocked path | Why |
+   |---|---|
+   | `config.php` | Contains API keys |
+   | `engine/` | PHP libraries, not endpoints |
+   | `database/` | Contains schema; `world.json` lives above the web root |
+   | `.git/`, `.github/`, `.cpanel.yml` | Deployment internals |
+   | `*.md` | Setup documentation |
 
-> **Tip:** If you cannot change the document root (some hosts lock it to
-> `public_html`), you can create a symbolic link instead:
->
-> ```bash
-> # In cPanel Terminal – remove default public_html content first
-> rm -rf /home/<user>/public_html
-> ln -s /home/<user>/realmforge/public /home/<user>/public_html
-> ```
->
-> Or move the contents of `public/` into `public_html/` and adjust paths in
-> `config.php` accordingly.
+2. **Root redirect** – a request to `https://playrealmforge.co.uk/` is
+   automatically sent to `https://playrealmforge.co.uk/public/` where the game
+   frontend lives.
+
+> **Note:** `mod_rewrite` must be enabled on your host (it is on virtually all
+> cPanel / Apache servers). If the redirect does not work, confirm it is enabled
+> in *MultiPHP Manager* or contact your host.
 
 ---
 
 ### Step 4 – Configure API Keys
 
-1. In **File Manager**, navigate to `/home/<user>/realmforge/` and open `config.php` for editing.
+1. In **File Manager**, navigate to `/home/playrealm/public_html/` and open
+   `config.php` for editing.
 2. Replace the placeholder values with your real keys:
 
    ```php
@@ -231,35 +219,43 @@ The game's front-end files (`index.html`, `style.css`, `app.js`) live in
 
    ```php
    ini_set('display_errors', 0);   // hide errors from visitors
-   ini_set('log_errors', 1);       // write errors to logs/errors.log
+   ini_set('log_errors', 1);       // write errors to /home/playrealm/logs/errors.log
    ```
 
 5. **Save** the file.
 
-> **Security:** `config.php` sits *outside* the public document root, so
-> visitors cannot access it directly. Never move it into `public/`.
+> **Security:** `config.php` is blocked by `.htaccess` so it cannot be
+> downloaded or read via HTTP even though it sits inside `public_html/`.
 
 ---
 
 ### Step 5 – Set Directory Permissions
 
-RealmForge needs to write AI-generated images and log files at runtime.
+RealmForge writes AI-generated images at runtime. Log files and world data are
+stored **above** `public_html/` so they are never reachable via HTTP.
 
 **Via cPanel File Manager:**
 
-1. Navigate to `/home/<user>/realmforge/`.
-2. Right-click the `images` folder → **Change Permissions** → set to **`0755`** → check **Recurse into subdirectories**.
-3. Repeat for the `logs` folder.
-4. Repeat for the `database` folder (the engine writes `world.json` here on first run).
+1. Navigate to `/home/playrealm/public_html/images/`.
+2. Right-click the `generated` folder → **Change Permissions** → set to
+   **`0755`** → check **Recurse into subdirectories**.
 
 **Via Terminal:**
 
 ```bash
-cd ~/realmforge
-chmod -R 755 images/generated/
-chmod -R 755 logs/
-chmod -R 755 database/
+chmod -R 755 ~/public_html/images/generated/
+chmod -R 755 ~/logs/
+chmod -R 755 ~/database/
 ```
+
+> The `logs/` and `database/` directories are created automatically by
+> `.cpanel.yml` on the first deploy. If you uploaded files manually, create
+> them now:
+>
+> ```bash
+> mkdir -p ~/logs ~/database
+> chmod 755 ~/logs ~/database
+> ```
 
 > **Tip:** Some hosts run PHP via CGI/FastCGI under your own user account, so
 > `755` is sufficient. If images still fail to save, try `775`. Avoid `777` in
@@ -270,34 +266,36 @@ chmod -R 755 database/
 ### Step 6 – Protect the Admin Dashboard
 
 The admin area at `/admin/dashboard.php` is protected by HTTP Basic Auth via
-`admin/.htaccess`. You need to create a `.htpasswd` file and update the path.
+`admin/.htaccess`. You need to create a `.htpasswd` file above the web root.
 
 **Via cPanel Terminal:**
 
 ```bash
-# Create the password file (you will be prompted for a password)
-mkdir -p ~/realmforge/.htpassfiles
-htpasswd -c ~/realmforge/.htpassfiles/.htpasswd admin
+# Create the password file above public_html (not web-accessible)
+mkdir -p ~/.htpassfiles
+htpasswd -c ~/.htpassfiles/.htpasswd admin
 
 # To add more users later, omit the -c flag (it overwrites the file):
-# htpasswd ~/realmforge/.htpassfiles/.htpasswd anotheruser
+# htpasswd ~/.htpassfiles/.htpasswd anotheruser
 ```
 
-Then edit `admin/.htaccess` in File Manager and update the `AuthUserFile` line:
+The `admin/.htaccess` file already points to this location:
 
 ```apache
-AuthUserFile /home/<user>/realmforge/.htpassfiles/.htpasswd
+AuthUserFile /home/playrealm/.htpassfiles/.htpasswd
 ```
 
 **Via cPanel's "Directory Privacy" tool:**
 
 1. In cPanel, go to **Directory Privacy** (under *Security*).
-2. Navigate to `realmforge/admin/`.
+2. Navigate to `public_html/admin/`.
 3. Check **Password protect this directory**, give it a label, and save.
 4. Add a user with a strong password.
 
 > **Tip:** The "Directory Privacy" method automatically generates the
-> `.htaccess` and `.htpasswd` entries for you—no command line needed.
+> `.htaccess` and `.htpasswd` entries for you—no command line needed. If you
+> use this method, remove the existing `admin/.htaccess` first so cPanel can
+> write its own.
 
 ---
 
@@ -307,7 +305,7 @@ RealmForge works entirely with JSON files by default. If you want persistent
 database-backed save games:
 
 1. In cPanel, open **MySQL® Databases**.
-2. Create a new database (e.g. `<user>_realmforge`).
+2. Create a new database (e.g. `playrealm_realmforge`).
 3. Create a new database user and assign it **ALL PRIVILEGES** on that database.
 4. Open **phpMyAdmin** (cPanel → *Databases* → *phpMyAdmin*).
 5. Select your new database in the left sidebar.
@@ -316,13 +314,13 @@ database-backed save games:
 
    ```php
    define('DB_HOST', 'localhost');
-   define('DB_NAME', '<user>_realmforge');
-   define('DB_USER', '<user>_rfuser');
+   define('DB_NAME', 'playrealm_realmforge');
+   define('DB_USER', 'playrealm_rfuser');
    define('DB_PASS', 'your-db-password');
    ```
 
 > **Tip:** On most cPanel hosts the database name and user are prefixed with
-> your cPanel username (e.g. `cpuser_realmforge`). Use the exact names shown in
+> your cPanel username (e.g. `playrealm_realmforge`). Use the exact names shown in
 > the MySQL Databases screen.
 
 ---
@@ -365,18 +363,11 @@ database-backed save games:
    | Field | Value |
    |---|---|
    | **Clone URL** | `https://github.com/hostyorkshire/realmforge.git` |
-   | **Repository Path** | `/home/<user>/realmforge` |
+   | **Repository Path** | `/home/playrealm/public_html` |
    | **Repository Name** | `realmforge` |
 
-5. Click **Create**. cPanel will clone the repo and run the `.cpanel.yml`
-   deployment tasks automatically on the first pull.
-
-> **Tip:** If the repository is private, use a **GitHub Deploy Key** (SSH) for
-> the most secure access. In GitHub go to *Settings → Deploy keys → Add deploy
-> key*, paste your server's public SSH key, and use the SSH clone URL
-> (`git@github.com:hostyorkshire/realmforge.git`). Alternatively you can add a
-> personal access token to the HTTPS URL:
-> `https://<token>@github.com/hostyorkshire/realmforge.git`
+5. Click **Create**. cPanel will clone the repo into `public_html/` and run the
+   `.cpanel.yml` deployment tasks automatically on the first pull.
 
 ### Step 2 – Generate a cPanel API Token
 
@@ -394,10 +385,10 @@ and create the following **Repository secrets**:
 
 | Secret | Example value | Description |
 |---|---|---|
-| `CPANEL_USERNAME` | `cpuser` | Your cPanel login username |
+| `CPANEL_USERNAME` | `playrealm` | Your cPanel login username |
 | `CPANEL_API_TOKEN` | `WBLY3E0JKH…` | The API token from Step 2 |
 | `CPANEL_HOST` | `server.hostyorkshire.co.uk` | cPanel server hostname |
-| `CPANEL_REPO_PATH` | `/home/cpuser/realmforge` | Full path to the repository on the server |
+| `CPANEL_REPO_PATH` | `/home/playrealm/public_html` | Full path to the repository on the server |
 
 ### Step 4 – (Optional) Enable Automatic Database Updates
 
@@ -413,7 +404,7 @@ To enable it:
    credentials:
 
    ```yaml
-   - /usr/bin/mysql -u cpuser_rfuser -p"your-db-password" cpuser_realmforge < database/schema.sql
+   - /usr/bin/mysql -u playrealm_rfuser -p"your-db-password" playrealm_realmforge < /home/playrealm/public_html/database/schema.sql
    ```
 
 3. Commit and push the change; the next deploy will run the import
@@ -449,24 +440,28 @@ To enable it:
 | Symptom | Likely cause | Fix |
 |---|---|---|
 | **500 Internal Server Error** | PHP version too low or `mod_rewrite` disabled | Set PHP to 8.0+ in *MultiPHP Manager*; check `.htaccess` syntax |
-| **Blank page / white screen** | PHP fatal error hidden by `display_errors 0` | Check `logs/errors.log` or temporarily set `display_errors` to `1` in `config.php` |
+| **Blank page / white screen** | PHP fatal error hidden by `display_errors 0` | Check `/home/playrealm/logs/errors.log` or temporarily set `display_errors` to `1` in `config.php` |
 | **"Failed to connect to api.groq.com"** | `curl` extension not enabled | Enable `curl` in *Select PHP Version* → *Extensions* |
-| **Images not appearing** | `images/generated/` not writable | Re-check permissions (step 5); look for errors in `logs/errors.log` |
-| **Admin page shows "401 Unauthorized"** | `.htpasswd` path wrong in `admin/.htaccess` | Run `realpath ~/realmforge/.htpassfiles/.htpasswd` in Terminal to get the correct absolute path |
-| **World not generating** | `database/` directory not writable | `chmod 755 database/` or set permissions in File Manager |
+| **Images not appearing** | `images/generated/` not writable | Re-check permissions (step 5); look for errors in `/home/playrealm/logs/errors.log` |
+| **Admin page shows "401 Unauthorized"** | `.htpasswd` path wrong in `admin/.htaccess` | Run `realpath ~/.htpassfiles/.htpasswd` in Terminal to get the correct absolute path |
+| **World not generating** | `/home/playrealm/database/` not writable or missing | `mkdir -p ~/database && chmod 755 ~/database` |
 | **API rate-limit errors** | Too many requests to Groq / Stability AI | Wait a minute and try again; check your plan's rate limits |
 
 ### Security Tips
 
-- **Keep `config.php` outside the document root.** The recommended directory
-  layout already does this—`public/` is the only folder exposed to the web.
+- **`.htaccess` blocks sensitive paths.** `config.php`, `engine/`, `database/`,
+  dotfiles, and documentation are all blocked from HTTP access by the root
+  `.htaccess`. Never delete or weaken these rules.
+- **Logs and world data live above `public_html/`.** `logs/` and `database/`
+  (containing `world.json`) are stored at `/home/playrealm/` — outside the web
+  root entirely — so they can never be reached via HTTP regardless of `.htaccess`.
 - **Use HTTPS.** Enable a free SSL certificate via cPanel → *SSL/TLS Status*
-  or *Let's Encrypt™* and force HTTPS in `public/.htaccess`.
+  or *Let's Encrypt™* and force HTTPS in `.htaccess`.
 - **Restrict `admin/` access** to your own IP address if possible by adding
   `Require ip <your-ip>` to `admin/.htaccess`.
 - **Change the default admin password** in `config.php` before going live.
-- **Disable directory listing** by ensuring `Options -Indexes` is present in
-  your root `.htaccess` (or `public/.htaccess`).
+- **Disable directory listing** – already enforced by `Options -Indexes` in the
+  root `.htaccess`.
 
 ---
 
