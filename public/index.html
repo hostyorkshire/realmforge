@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>RealmForge – AI Cinematic Adventure RPG</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&amp;family=Inter:wght@300;400;500&amp;display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- ── Header ───────────────────────────────────────────────────────────── -->
+  <header class="site-header">
+    <div class="header-inner">
+      <div class="logo">
+        <span class="logo-icon">⚔</span>
+        <span class="logo-text">RealmForge</span>
+      </div>
+      <span class="domain">playrealmforge.co.uk</span>
+    </div>
+  </header>
+
+  <!-- ── Main Layout ──────────────────────────────────────────────────────── -->
+  <main class="game-layout">
+
+    <!-- Left: Scene + Story + Choices -->
+    <section class="main-panel">
+
+      <!-- Scene Image -->
+      <div class="scene-container" id="sceneContainer">
+        <div class="scene-placeholder" id="scenePlaceholder">
+          <span class="scene-icon">🏰</span>
+          <p>Your adventure begins…</p>
+        </div>
+        <img id="sceneImage" class="scene-image hidden" src="" alt="Scene" />
+        <div class="scene-overlay" id="sceneOverlay"></div>
+      </div>
+
+      <!-- Story Text -->
+      <div class="story-panel" id="storyPanel">
+        <div class="story-text" id="storyText">
+          <p class="story-intro">
+            Welcome to <strong>RealmForge</strong>. You stand at the edge of a world teeming with
+            magic, danger, and untold adventure. The village of Stonebridge lies before you,
+            smoke curling from its chimneys as evening descends. Your journey begins now.
+          </p>
+        </div>
+      </div>
+
+      <!-- Choice Buttons -->
+      <div class="choices-panel" id="choicesPanel">
+        <button class="choice-btn" data-choice="0" id="choice0">Enter the village</button>
+        <button class="choice-btn" data-choice="1" id="choice1">Look around the area</button>
+        <button class="choice-btn" data-choice="2" id="choice2">Rest by the roadside</button>
+      </div>
+
+      <!-- Custom Command -->
+      <div class="command-panel">
+        <div class="command-row">
+          <input
+            type="text"
+            id="customCommand"
+            class="command-input"
+            placeholder="Or type your own action… (e.g. climb the tower)"
+            maxlength="200"
+            autocomplete="off"
+          />
+          <button id="commandSubmit" class="command-btn">▶ Go</button>
+        </div>
+        <div class="command-hint">Custom actions use the free-text engine</div>
+      </div>
+
+      <!-- Status Bar -->
+      <div class="status-bar" id="statusBar">
+        <span class="status-item" id="statusLocation">📍 Stonebridge Village</span>
+        <span class="status-item" id="statusHealth">❤️ 100 HP</span>
+        <span class="status-item" id="statusGold">💰 25 Gold</span>
+      </div>
+
+    </section>
+
+    <!-- Right: Sidebar -->
+    <aside class="sidebar">
+
+      <!-- Inventory -->
+      <div class="sidebar-section" id="inventorySection">
+        <h3 class="sidebar-title">⚒ Inventory</h3>
+        <ul class="item-list" id="inventoryList">
+          <li class="item-entry">Torch</li>
+        </ul>
+      </div>
+
+      <!-- Quests -->
+      <div class="sidebar-section" id="questsSection">
+        <h3 class="sidebar-title">📜 Active Quests</h3>
+        <ul class="item-list" id="questList">
+          <li class="item-entry quest-none">No active quests</li>
+        </ul>
+      </div>
+
+      <!-- Factions -->
+      <div class="sidebar-section" id="factionsSection">
+        <h3 class="sidebar-title">🏴 Faction Standing</h3>
+        <ul class="item-list" id="factionList">
+          <li class="item-entry faction-entry">
+            <span>Kingdom of Avaros</span>
+            <span class="faction-rep neutral">Neutral</span>
+          </li>
+        </ul>
+      </div>
+
+      <!-- Mini Map -->
+      <div class="sidebar-section">
+        <h3 class="sidebar-title">🗺 World Map</h3>
+        <div class="mini-map" id="miniMap">
+          <canvas id="mapCanvas" width="220" height="220"></canvas>
+          <div class="map-legend">
+            <span class="legend-item forest">■ Forest</span>
+            <span class="legend-item plains">■ Plains</span>
+            <span class="legend-item mountains">■ Mountains</span>
+          </div>
+        </div>
+      </div>
+
+    </aside>
+  </main>
+
+  <!-- ── Loading Overlay ──────────────────────────────────────────────────── -->
+  <div class="loading-overlay hidden" id="loadingOverlay">
+    <div class="loading-inner">
+      <div class="loading-spinner"></div>
+      <p class="loading-text">The Game Master is weaving your story…</p>
+    </div>
+  </div>
+
+  <!-- ── Notification Toast ───────────────────────────────────────────────── -->
+  <div class="toast hidden" id="toast"></div>
+
+  <script src="app.js"></script>
+</body>
+</html>

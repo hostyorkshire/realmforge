@@ -1,0 +1,35 @@
+# Dependencies
+vendor/
+node_modules/
+
+# Generated images (cached locally, not committed)
+images/generated/scenes/*.png
+images/generated/npcs/*.png
+images/generated/monsters/*.png
+images/generated/items/*.png
+images/generated/towns/*.png
+images/generated/dungeons/*.png
+images/generated/maps/*.png
+
+# Generated world data (regenerated on deploy)
+# database/world.json is intentionally committed as a placeholder
+
+# Log files (runtime data)
+logs/*.log
+
+# PHP error logs
+*.error_log
+error_log
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Sensitive config overrides
+config.local.php
