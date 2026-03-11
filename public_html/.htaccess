@@ -4,21 +4,9 @@ Options -Indexes
 <IfModule mod_rewrite.c>
     RewriteEngine On
 
-    # Block all dotfiles and dot-directories (.git, .github, .cpanel.yml, etc.)
+    # Block all dotfiles and dot-directories
     RewriteRule (^|/)\.  - [F,L]
-
-    # Block direct HTTP access to config.php (API keys live here)
-    RewriteRule ^config\.php$ - [F,L]
-
-    # Block the engine/ directory – PHP libraries, not web endpoints
-    RewriteRule ^engine(/|$) - [F,L]
-
-    # Block the database/ directory – schema only, no public access needed
-    RewriteRule ^database(/|$) - [F,L]
 
     # Block documentation files
     RewriteRule \.md$ - [F,L]
-
-    # Redirect the bare domain root permanently to the game frontend
-    RewriteRule ^$ /public/ [R=301,L]
 </IfModule>

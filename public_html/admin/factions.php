@@ -3,8 +3,8 @@
  * Admin – Faction Manager
  */
 
-require_once __DIR__ . '/../config.php';
-require_once __DIR__ . '/../engine/factions.php';
+require_once __DIR__ . '/../../config.php';
+require_once __DIR__ . '/../../engine/factions.php';
 
 $factions = getAllFactions();
 ?>

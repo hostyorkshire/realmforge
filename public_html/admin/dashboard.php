@@ -4,7 +4,7 @@
  * Overview of RealmForge statistics and quick links.
  */
 
-require_once __DIR__ . '/../config.php';
+require_once __DIR__ . '/../../config.php';
 
 $logFiles = [
     'AI Requests'    => LOGS_PATH . '/ai_requests.log',

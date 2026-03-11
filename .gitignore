@@ -12,7 +12,7 @@ public_html/images/generated/dungeons/*.png
 public_html/images/generated/maps/*.png
 
 # Generated world data (regenerated on deploy)
-# public_html/database/world.json is intentionally committed as a placeholder
+# database/world.json is intentionally committed as a placeholder
 
 # Log files (runtime data – stored above public_html, never in the repo)
 logs/*.log
@@ -20,6 +20,16 @@ logs/*.log
 # PHP error logs
 *.error_log
 error_log
+
+# Sensitive config overrides
+config.local.php
+
+# Keep config.php, database/, and engine/ at repo root (outside public_html)
+# These must NEVER appear inside public_html/
+public_html/config.php
+public_html/config.local.php
+public_html/engine/
+public_html/database/
 
 # OS files
 .DS_Store
@@ -30,6 +40,3 @@ Thumbs.db
 .vscode/
 *.swp
 *.swo
-
-# Sensitive config overrides
-config.local.php

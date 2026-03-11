@@ -3,7 +3,7 @@
  * Admin – Image Cache Manager
  */
 
-require_once __DIR__ . '/../config.php';
+require_once __DIR__ . '/../../config.php';
 
 $subDirs = ['scenes', 'npcs', 'monsters', 'items', 'towns', 'dungeons', 'maps'];
 $counts  = [];

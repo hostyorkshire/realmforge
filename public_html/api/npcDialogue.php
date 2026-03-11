@@ -4,9 +4,9 @@
  * Returns context-aware NPC dialogue using the Groq API.
  */
 
-require_once __DIR__ . '/../config.php';
-require_once __DIR__ . '/../engine/npcs.php';
-require_once __DIR__ . '/../engine/parser.php';
+require_once __DIR__ . '/../../config.php';
+require_once __DIR__ . '/../../engine/npcs.php';
+require_once __DIR__ . '/../../engine/parser.php';
 
 header('Content-Type: application/json');
 header('X-Content-Type-Options: nosniff');
