@@ -25,6 +25,9 @@ RealmForge is a browser-based dark-fantasy RPG where an AI Game Master narrates 
 
 ```
 realmforge/
+├── .cpanel.yml              # cPanel Git deployment tasks
+├── .github/workflows/
+│   └── deploy.yml           # GitHub Actions → cPanel auto-deploy
 ├── config.php               # API keys and global constants
 ├── README.md
 ├── PROJECT_BRIEF.md
@@ -332,6 +335,112 @@ database-backed save games:
 3. **Check image generation.** Scene art should appear above the story text after a short delay. If it does not, verify your Stability AI key and that `images/generated/` is writable.
 4. On **first load** the world is automatically generated and saved to `database/world.json`. This may take a moment.
 5. **Visit the admin dashboard** at `https://playrealmforge.co.uk/admin/dashboard.php` and log in with the credentials you configured.
+
+---
+
+## Automatic Deployment (cPanel Git + GitHub Actions)
+
+> Every time you merge a pull request on GitHub the site code **and** database
+> schema are automatically updated on your cPanel development server. This uses
+> cPanel's built-in **Git Version Control** feature together with a small GitHub
+> Actions workflow.
+
+### How It Works
+
+1. A PR is merged into the `main` branch on GitHub.
+2. The **Deploy to cPanel** GitHub Actions workflow fires and calls the cPanel
+   API to pull the latest code.
+3. cPanel pulls from GitHub and reads the `.cpanel.yml` file in the repository
+   root.
+4. `.cpanel.yml` runs the deployment tasks: creates runtime directories, sets
+   permissions, and (optionally) imports the database schema.
+
+### Step 1 – Create a Git Repository in cPanel
+
+1. Log in to cPanel and go to **Git™ Version Control** (under *Files*).
+2. Click **Create**.
+3. Toggle **Clone a Repository** on.
+4. Fill in the fields:
+
+   | Field | Value |
+   |---|---|
+   | **Clone URL** | `https://github.com/hostyorkshire/realmforge.git` |
+   | **Repository Path** | `/home/<user>/realmforge` |
+   | **Repository Name** | `realmforge` |
+
+5. Click **Create**. cPanel will clone the repo and run the `.cpanel.yml`
+   deployment tasks automatically on the first pull.
+
+> **Tip:** If the repository is private, use a **GitHub Deploy Key** (SSH) for
+> the most secure access. In GitHub go to *Settings → Deploy keys → Add deploy
+> key*, paste your server's public SSH key, and use the SSH clone URL
+> (`git@github.com:hostyorkshire/realmforge.git`). Alternatively you can add a
+> personal access token to the HTTPS URL:
+> `https://<token>@github.com/hostyorkshire/realmforge.git`
+
+### Step 2 – Generate a cPanel API Token
+
+The GitHub Actions workflow needs an API token to tell cPanel to pull new
+changes.
+
+1. In cPanel, go to **Manage API Tokens** (under *Security*).
+2. Click **Create** and give the token a name (e.g. `github-deploy`).
+3. Copy the generated token — you will need it in the next step.
+
+### Step 3 – Add GitHub Repository Secrets
+
+In your GitHub repository, go to **Settings → Secrets and variables → Actions**
+and create the following **Repository secrets**:
+
+| Secret | Example value | Description |
+|---|---|---|
+| `CPANEL_USERNAME` | `cpuser` | Your cPanel login username |
+| `CPANEL_API_TOKEN` | `WBLY3E0JKH…` | The API token from Step 2 |
+| `CPANEL_HOST` | `server.hostyorkshire.co.uk` | cPanel server hostname |
+| `CPANEL_REPO_PATH` | `/home/cpuser/realmforge` | Full path to the repository on the server |
+
+### Step 4 – (Optional) Enable Automatic Database Updates
+
+The `.cpanel.yml` file includes a commented-out task that imports
+`database/schema.sql` into MySQL on every deploy. The SQL uses
+`CREATE TABLE IF NOT EXISTS`, so it is safe to run repeatedly — it will create
+missing tables without affecting existing data.
+
+To enable it:
+
+1. Open `.cpanel.yml` in the repository root.
+2. Uncomment the last line and replace the placeholders with your cPanel MySQL
+   credentials:
+
+   ```yaml
+   - /usr/bin/mysql -u cpuser_rfuser -p"your-db-password" cpuser_realmforge < database/schema.sql
+   ```
+
+3. Commit and push the change; the next deploy will run the import
+   automatically.
+
+> **Security:** Avoid committing plain-text database passwords. A safer
+> alternative is to store credentials in a non-committed file on the server
+> (e.g. `~/.my.cnf`) so `mysql` authenticates automatically, or to read them
+> from environment variables in a small deploy script. If your repository is
+> public, **never** put credentials in `.cpanel.yml`.
+
+### Step 5 – Test the Pipeline
+
+1. Create a branch, make a small change, and open a pull request.
+2. Merge the PR into `main`.
+3. Go to **Actions** in your GitHub repository — you should see the *Deploy to
+   cPanel* workflow run and succeed.
+4. In cPanel → **Git™ Version Control**, click **Manage** next to `realmforge`
+   and confirm it shows the latest commit.
+5. Visit your site to verify the change is live.
+
+### Deployment File Reference
+
+| File | Purpose |
+|---|---|
+| `.cpanel.yml` | Defines post-pull deployment tasks (directory creation, permissions, optional DB import) |
+| `.github/workflows/deploy.yml` | GitHub Actions workflow that triggers the cPanel pull via the UAPI on every push to `main` |
 
 ---
 
