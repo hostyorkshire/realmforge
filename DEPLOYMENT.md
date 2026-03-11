@@ -29,8 +29,8 @@ This document outlines the steps required to automate code updates from the priv
 
   ```bash
   #!/bin/bash
-  # Change to the repository directory (cloned into public_html)
-  cd /home/playrealm/public_html
+  # Change to the repository directory (cloned into the home directory)
+  cd /home/playrealm
 
   # Add the deploy key to SSH agent
   eval `ssh-agent -s`

@@ -58,10 +58,10 @@ The AI Game Master:
 - Input capped at 200 characters
 
 ## Deployment
-1. Clone repo into `/home/playrealm/public_html` (the cPanel web root)
-2. Configure `config.php` with real API keys
+1. Clone repo into `/home/playrealm` (the cPanel home directory – the repo structure mirrors the server paths, with `public_html/` as a subfolder)
+2. Configure `public_html/config.php` with real API keys
 3. `.cpanel.yml` creates `~/logs/` and `~/database/` above the web root on first deploy; ensure they are writable
-4. `images/generated/` is created inside `public_html/` and is web-accessible for serving scene art
-5. Root `.htaccess` blocks `config.php`, `engine/`, `database/`, dotfiles, and docs from HTTP access, and redirects `/` to `/public/`
+4. `public_html/images/generated/` is created inside `public_html/` and is web-accessible for serving scene art
+5. `public_html/.htaccess` blocks `config.php`, `engine/`, `database/`, dotfiles, and docs from HTTP access, and redirects `/` to `/public/`
 6. Configure admin `.htpasswd` at `~/.htpassfiles/.htpasswd`
 7. Visit site – world auto-generates on first load

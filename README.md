@@ -21,62 +21,68 @@ RealmForge is a browser-based dark-fantasy RPG where an AI Game Master narrates 
 
 ---
 
-## On-Server Directory Layout
+## Repository & On-Server Directory Layout
 
-The repository is cloned directly into `public_html/` (the cPanel web root).
-Write-needed runtime directories sit **above** `public_html/` so they are never
-reachable via HTTP. The root `.htaccess` blocks direct access to every sensitive
-path inside `public_html/`.
+The **repository structure mirrors the server path structure exactly**. The repo
+is cloned into `/home/playrealm/` (the cPanel home directory), so every folder
+you see in the repo maps directly to the same path on the server.
+
+The `public_html/` subfolder inside the repo becomes the Apache web root
+(`/home/playrealm/public_html/`). Runtime write-directories (`logs/`,
+`database/`) sit **above** `public_html/` in the home directory, so they are
+never reachable via HTTP. The `public_html/.htaccess` blocks direct access to
+every sensitive path inside the web root.
 
 ```
-/home/playrealm/
+/home/playrealm/               ← cPanel home directory / git repository root
 │
-├── public_html/                  ← web root / git repository
-│   ├── .htaccess                 # Security rules – blocks config, engine, database, dotfiles
-│   ├── .cpanel.yml               # cPanel Git deployment tasks
-│   ├── .github/workflows/
-│   │   └── deploy.yml            # GitHub Actions → cPanel auto-deploy
-│   ├── config.php                # API keys – blocked by .htaccess
-│   │
-│   ├── api/                      # JSON API endpoints (web-accessible PHP)
-│   │   ├── adventure.php         # Main game loop (action → AI narration)
-│   │   ├── generateImage.php     # Image generation with caching
-│   │   ├── npcDialogue.php       # Contextual NPC conversation
-│   │   ├── compressMemory.php    # Story memory compression
-│   │   ├── generateDungeon.php   # Procedural dungeon rooms
-│   │   └── generateWorld.php     # World generation / retrieval
-│   │
-│   ├── engine/                   # PHP game engine – blocked by .htaccess
-│   │   └── *.php
-│   │
-│   ├── database/                 # schema.sql only – blocked by .htaccess
-│   │   └── schema.sql
-│   │
-│   ├── public/                   # Game frontend – served at /public/
-│   │   ├── index.html
-│   │   ├── style.css
-│   │   └── app.js
-│   │
-│   ├── admin/                    # Password-protected admin area
-│   │   ├── .htaccess
-│   │   └── *.php
-│   │
-│   └── images/generated/         # Stable Diffusion cache – web-accessible
-│       ├── scenes/
-│       ├── npcs/
-│       ├── monsters/
-│       ├── items/
-│       ├── towns/
-│       ├── dungeons/
-│       └── maps/
+├── .cpanel.yml                # cPanel Git deployment tasks
+├── .github/workflows/
+│   └── deploy.yml             # GitHub Actions → cPanel auto-deploy
+├── README.md
 │
-├── logs/                         ← above public_html – never web-accessible
-│   ├── ai_requests.log
-│   ├── player_actions.log
-│   └── errors.log
-│
-└── database/                     ← above public_html – never web-accessible
-    └── world.json                # Generated world data (written at runtime)
+└── public_html/               ← Apache web root (https://playrealmforge.co.uk)
+    ├── .htaccess              # Security rules – blocks config, engine, database, dotfiles
+    ├── config.php             # API keys – blocked by .htaccess
+    │
+    ├── api/                   # JSON API endpoints (web-accessible PHP)
+    │   ├── adventure.php      # Main game loop (action → AI narration)
+    │   ├── generateImage.php  # Image generation with caching
+    │   ├── npcDialogue.php    # Contextual NPC conversation
+    │   ├── compressMemory.php # Story memory compression
+    │   ├── generateDungeon.php# Procedural dungeon rooms
+    │   └── generateWorld.php  # World generation / retrieval
+    │
+    ├── engine/                # PHP game engine – blocked by .htaccess
+    │   └── *.php
+    │
+    ├── database/              # schema.sql only – blocked by .htaccess
+    │   └── schema.sql
+    │
+    ├── public/                # Game frontend – served at /public/
+    │   ├── index.html
+    │   ├── style.css
+    │   └── app.js
+    │
+    ├── admin/                 # Password-protected admin area
+    │   ├── .htaccess
+    │   └── *.php
+    │
+    └── images/generated/      # Stable Diffusion cache – web-accessible
+        ├── scenes/
+        ├── npcs/
+        ├── monsters/
+        ├── items/
+        ├── towns/
+        ├── dungeons/
+        └── maps/
+
+NOTE: The following runtime directories are created automatically by
+.cpanel.yml on first deploy. They live above public_html and are
+never web-accessible:
+
+  /home/playrealm/logs/          ← ai_requests.log, player_actions.log, errors.log
+  /home/playrealm/database/      ← world.json (generated world data)
 ```
 
 ---
@@ -122,26 +128,34 @@ path inside `public_html/`.
 
 ### Step 1 – Upload the Files
 
+> **Important:** The repository mirrors the server path structure. The repo root
+> corresponds to `/home/playrealm/` (your cPanel home), and the `public_html/`
+> subfolder inside the repo becomes `/home/playrealm/public_html/` (the web
+> root). Upload files accordingly.
+
 Choose **one** of the three methods below.
 
 #### Option A – cPanel File Manager (no SSH needed)
 
 1. Download the repository as a ZIP from GitHub:
    `https://github.com/hostyorkshire/realmforge/archive/refs/heads/main.zip`
-2. In cPanel, open **File Manager** → navigate to `/home/playrealm/public_html/`.
+2. In cPanel, open **File Manager** → navigate to `/home/playrealm/` (your home directory, **not** inside `public_html/`).
 3. Click **Upload** → select the ZIP file → wait for the upload to finish.
-4. Select the uploaded ZIP → click **Extract** → extract into `public_html/`.
-5. If the ZIP extracts into a subdirectory (e.g. `realmforge-main/`), move all
-   files one level up so that `config.php`, `public/`, `api/`, etc. are directly
-   inside `public_html/`.
+4. Select the uploaded ZIP → click **Extract** → extract into `/home/playrealm/`.
+5. If the ZIP extracts into a subdirectory (e.g. `realmforge-main/`), move the
+   contents (`.cpanel.yml`, `.github/`, `public_html/`, etc.) one level up so
+   they sit directly inside `/home/playrealm/`.
+6. The `public_html/` folder from the ZIP will merge with the existing
+   `/home/playrealm/public_html/` web root, placing `config.php`, `admin/`,
+   `api/`, etc. correctly inside the web root.
 
 #### Option B – cPanel Terminal / SSH
 
 If your host enables **Terminal** (cPanel → *Advanced* → *Terminal*):
 
 ```bash
-# Clone into public_html directly (the . means "current directory, not a subfolder")
-cd ~/public_html
+# Clone into the home directory (the . means "current directory, not a subfolder")
+cd ~
 git clone https://github.com/hostyorkshire/realmforge.git .
 ```
 
@@ -150,10 +164,12 @@ git clone https://github.com/hostyorkshire/realmforge.git .
 Upload the repository contents with an FTP client such as FileZilla:
 
 - **Host:** your server hostname (see cPanel → *FTP Accounts*)
-- **Remote path:** `/home/playrealm/public_html/`
+- **Remote path:** `/home/playrealm/` (your home directory)
 
 > **Tip:** Whichever method you use, the final result should have `config.php`,
-> `public/`, `api/`, etc. directly inside `/home/playrealm/public_html/`.
+> `public/`, `api/`, `admin/`, etc. directly inside
+> `/home/playrealm/public_html/`, and `.cpanel.yml` directly inside
+> `/home/playrealm/`.
 
 ---
 
@@ -170,10 +186,11 @@ Upload the repository contents with an FTP client such as FileZilla:
 
 ### Step 3 – Document Root and Security (.htaccess)
 
-The repository root (`/home/playrealm/public_html/`) **is** the cPanel default
-document root, so no domain reconfiguration is needed.
+The `public_html/` subfolder inside the repository maps to
+`/home/playrealm/public_html/`, which **is** the cPanel default document root.
+No domain reconfiguration is needed.
 
-The included `.htaccess` file at the repository root handles two things
+The included `.htaccess` file at `public_html/.htaccess` handles two things
 automatically:
 
 1. **Security** – blocks direct HTTP access to files and directories that should
@@ -363,11 +380,18 @@ database-backed save games:
    | Field | Value |
    |---|---|
    | **Clone URL** | `https://github.com/hostyorkshire/realmforge.git` |
-   | **Repository Path** | `/home/playrealm/public_html` |
+   | **Repository Path** | `/home/playrealm` |
    | **Repository Name** | `realmforge` |
 
-5. Click **Create**. cPanel will clone the repo into `public_html/` and run the
-   `.cpanel.yml` deployment tasks automatically on the first pull.
+   > **Why `/home/playrealm` and not `/home/playrealm/public_html`?**
+   > The repository structure mirrors the server path structure. The repo root
+   > maps to your cPanel home directory, and the `public_html/` subfolder in
+   > the repo maps to `/home/playrealm/public_html/` (the web root). This makes
+   > it immediately clear in the repo which files are web-accessible and which
+   > are not.
+
+5. Click **Create**. cPanel will clone the repo into your home directory and run
+   the `.cpanel.yml` deployment tasks automatically on the first pull.
 
 ### Step 2 – Generate a cPanel API Token
 
@@ -388,7 +412,7 @@ and create the following **Repository secrets**:
 | `CPANEL_USERNAME` | `playrealm` | Your cPanel login username |
 | `CPANEL_API_TOKEN` | `WBLY3E0JKH…` | The API token from Step 2 |
 | `CPANEL_HOST` | `server.hostyorkshire.co.uk` | cPanel server hostname |
-| `CPANEL_REPO_PATH` | `/home/playrealm/public_html` | Full path to the repository on the server |
+| `CPANEL_REPO_PATH` | `/home/playrealm` | Full path to the repository root on the server |
 
 ### Step 4 – (Optional) Enable Automatic Database Updates
 
