@@ -1,8 +1,68 @@
 # RealmForge – AI Cinematic Adventure RPG
 
-> **Live at:** [playrealmforge.co.uk](https://playrealmforge.co.uk)
+> **Play now:** [playrealmforge.co.uk](https://playrealmforge.co.uk)
 
-RealmForge is a browser-based dark-fantasy RPG where an AI Game Master narrates dynamic adventures while a backend game engine enforces all gameplay mechanics. Every session is unique: the world is procedurally generated, story events are AI-narrated via Groq, and scene artwork is created on demand using Stable Diffusion.
+**RealmForge** is a browser-based **dark-fantasy RPG** set in a procedurally generated world. An AI Game Master narrates every moment of your adventure—describing the sights, sounds, and dangers of each new scene in vivid prose. No two playthroughs are the same: the continent, its towns, factions, dungeons, and NPCs are all generated fresh for each installation, and every action you take shapes the story that unfolds.
+
+Whether you are exploring haunted ruins, negotiating with a shadowy guild, or carving your way through a monster-filled dungeon, RealmForge responds to *your* choices with AI-written narration and on-demand scene artwork—making it feel like a personal tabletop campaign that never stops.
+
+---
+
+## How to Play / Quick Start
+
+### 1. Your Adventure Begins
+
+When you first visit the game, a **procedurally generated world** is created: a 50×50 tile continent filled with kingdoms, towns, biomes (forest, mountains, desert, swamp, and more), roads, and dungeons. The AI Game Master sets the scene with an atmospheric opening paragraph and drops you right into the story.
+
+No account or download is required—just open the game in your browser and start playing.
+
+### 2. Choose Your Next Move
+
+At the bottom of every scene you will find **three AI-suggested actions** tailored to the current situation—attack, negotiate, explore, flee, or anything else the moment calls for. You can pick one of these with a single click, or type **any free-text command** of your own (up to 200 characters) for complete freedom.
+
+> *"Search the body for clues."*  
+> *"Offer the innkeeper a bribe."*  
+> *"Charge headlong into the cave."*
+
+### 3. The Story Unfolds
+
+After you act, the game engine processes your choice and the **Groq AI** (llama-3.1-8b-instant) writes the next 80–120 word story beat—describing exactly what happens as a result. Simultaneously, **Stable Diffusion** generates a unique piece of scene art to match: landscapes, dungeon chambers, NPC portraits, monster encounters, and more. Images are cached so repeated visits to the same location feel consistent.
+
+### 4. Core Gameplay Loop
+
+| Phase | What happens |
+|---|---|
+| **Scene** | AI narration describes where you are and what is happening |
+| **Choice** | Pick an AI-suggested action or type your own command |
+| **Resolution** | The engine resolves combat (dice-based), dialogue, or exploration |
+| **Art** | Stable Diffusion generates scene art for the new beat |
+| **State update** | Your health, gold, inventory, quest progress, and reputation are updated |
+| **Next scene** | The AI narrates the outcome and presents three new choices |
+
+Your **story memory** is kept concise automatically—older events are summarised by the AI so long sessions never lose context.
+
+### 5. World, Factions & Reputation
+
+The world is home to **five factions**—the Kingdom of Avaros, Iron Dominion, Northern Clans, Shadow Brotherhood, and Temple of Dawn—each with their own quests, merchants, and attitudes toward you. Every action you take adjusts your reputation with the relevant faction, unlocking new quests, discounts, or hostility depending on your choices. Building alliances or burning bridges is entirely up to you.
+
+### 6. NPCs, Dialogue & Quests
+
+Every town and dungeon is populated with **AI-driven NPCs**. When you speak to a character, the AI generates contextually appropriate dialogue based on who they are, where you are, and your current reputation. NPCs offer **multi-step quests** with gold and item rewards. Complete them to advance faction standing and unlock new areas and storylines.
+
+### 7. Inventory & Combat
+
+Weapons, armour, potions, and loot drops are tracked in a persistent **inventory system**. Combat is resolved by the engine using a dice-based system—your equipped gear influences the outcome. Defeated enemies drop items; merchants buy and sell; dungeons hide rare loot behind locked doors and boss encounters.
+
+### 8. Admin Dashboard (Game Masters & Administrators)
+
+If you are hosting your own RealmForge installation, the **admin dashboard** at `/admin/dashboard.php` gives you full control:
+
+- Monitor AI logs and player action history
+- Browse and edit quests, NPCs, factions, and world lore
+- Manage the Stable Diffusion image cache
+- View or regenerate the entire world
+
+The dashboard is password-protected and intended for the host/GM, not players. See the [Deployment](#deployment-cpanel-shared-hosting) section for setup details.
 
 ---
 
