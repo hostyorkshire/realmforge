@@ -371,7 +371,11 @@ database-backed save games:
 5. Click **Create**. cPanel will clone the repo and run the `.cpanel.yml`
    deployment tasks automatically on the first pull.
 
-> **Tip:** If the repository is private, add an access token to the Clone URL:
+> **Tip:** If the repository is private, use a **GitHub Deploy Key** (SSH) for
+> the most secure access. In GitHub go to *Settings → Deploy keys → Add deploy
+> key*, paste your server's public SSH key, and use the SSH clone URL
+> (`git@github.com:hostyorkshire/realmforge.git`). Alternatively you can add a
+> personal access token to the HTTPS URL:
 > `https://<token>@github.com/hostyorkshire/realmforge.git`
 
 ### Step 2 – Generate a cPanel API Token
@@ -415,10 +419,11 @@ To enable it:
 3. Commit and push the change; the next deploy will run the import
    automatically.
 
-> **Security:** Database credentials in `.cpanel.yml` are stored in the private
-> repository on the server. If your repository is public, consider using a
-> separate deploy script that reads credentials from a non-committed file
-> instead.
+> **Security:** Avoid committing plain-text database passwords. A safer
+> alternative is to store credentials in a non-committed file on the server
+> (e.g. `~/.my.cnf`) so `mysql` authenticates automatically, or to read them
+> from environment variables in a small deploy script. If your repository is
+> public, **never** put credentials in `.cpanel.yml`.
 
 ### Step 5 – Test the Pipeline
 
