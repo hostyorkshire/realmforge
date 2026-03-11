@@ -16,10 +16,13 @@ define('STABLE_DIFFUSION_API_KEY', getenv('STABLE_DIFFUSION_API_KEY') ?: 'your-s
 define('STABLE_DIFFUSION_ENDPOINT', 'https://api.stability.ai/v2beta/stable-image/generate/core');
 
 // Paths
-define('BASE_PATH', dirname(__FILE__));
-define('IMAGES_PATH', BASE_PATH . '/images/generated');
-define('LOGS_PATH', BASE_PATH . '/logs');
-define('DATABASE_PATH', BASE_PATH . '/database');
+// BASE_PATH  = /home/playrealm/public_html      (the repository / web root)
+// HOME_PATH  = /home/playrealm                  (one level above public_html)
+define('BASE_PATH',    dirname(__FILE__));
+define('HOME_PATH',    dirname(BASE_PATH));
+define('IMAGES_PATH',  BASE_PATH  . '/images/generated');   // inside public_html – web-accessible
+define('LOGS_PATH',    HOME_PATH  . '/logs');                // above public_html – not web-accessible
+define('DATABASE_PATH', HOME_PATH . '/database');            // above public_html – not web-accessible
 
 // World settings
 define('WORLD_FILE', DATABASE_PATH . '/world.json');
