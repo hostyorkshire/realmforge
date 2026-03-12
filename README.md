@@ -100,10 +100,17 @@ every sensitive path inside the web root.
 ├── .github/workflows/
 │   └── deploy.yml             # GitHub Actions → cPanel auto-deploy
 ├── README.md
+├── config.php                 # API keys & paths – above the web root, never HTTP-accessible
+│
+├── engine/                    # PHP game engine – above the web root, never HTTP-accessible
+│   └── *.php
+│
+├── database/                  # Schema + generated world data – above the web root
+│   ├── schema.sql
+│   └── world.json             # Generated on first launch
 │
 └── public_html/               ← Apache web root (https://playrealmforge.co.uk)
-    ├── .htaccess              # Security rules – blocks config, engine, database, dotfiles
-    ├── config.php             # API keys – blocked by .htaccess
+    ├── .htaccess              # Security rules – blocks dotfiles and documentation
     │
     ├── api/                   # JSON API endpoints (web-accessible PHP)
     │   ├── adventure.php      # Main game loop (action → AI narration)
@@ -112,12 +119,6 @@ every sensitive path inside the web root.
     │   ├── compressMemory.php # Story memory compression
     │   ├── generateDungeon.php# Procedural dungeon rooms
     │   └── generateWorld.php  # World generation / retrieval
-    │
-    ├── engine/                # PHP game engine – blocked by .htaccess
-    │   └── *.php
-    │
-    ├── database/              # schema.sql only – blocked by .htaccess
-    │   └── schema.sql
     │
     ├── public/                # Game frontend – served at /public/
     │   ├── index.html
@@ -137,12 +138,10 @@ every sensitive path inside the web root.
         ├── dungeons/
         └── maps/
 
-NOTE: The following runtime directories are created automatically by
-.cpanel.yml on first deploy. They live above public_html and are
-never web-accessible:
+NOTE: The logs/ directory is created automatically by .cpanel.yml on
+first deploy. It lives above public_html and is never web-accessible:
 
   /home/playrealm/logs/          ← ai_requests.log, player_actions.log, errors.log
-  /home/playrealm/database/      ← world.json (generated world data)
 ```
 
 ---
@@ -250,21 +249,25 @@ The `public_html/` subfolder inside the repository maps to
 `/home/playrealm/public_html/`, which **is** the cPanel default document root.
 No domain reconfiguration is needed.
 
-The included `.htaccess` file at `public_html/.htaccess` handles two things
-automatically:
+**Sensitive files live above the web root.** `config.php` (API keys), `engine/`
+(game logic), and `database/` (schema and world data) are stored at
+`/home/playrealm/` — outside `public_html/` entirely — so Apache will never
+serve them regardless of `.htaccess` configuration.
 
-1. **Security** – blocks direct HTTP access to files and directories that should
-   never be reachable from a browser:
+The included `.htaccess` file at `public_html/.htaccess` provides additional
+defence in depth:
 
-   | Blocked path | Why |
+1. **Directory listing** – disabled via `Options -Indexes`.
+
+2. **Dotfiles & documentation** – blocks direct HTTP access to deployment
+   internals and documentation that may exist inside the web root:
+
+   | Blocked pattern | Examples |
    |---|---|
-   | `config.php` | Contains API keys |
-   | `engine/` | PHP libraries, not endpoints |
-   | `database/` | Contains schema; `world.json` lives above the web root |
-   | `.git/`, `.github/`, `.cpanel.yml` | Deployment internals |
-   | `*.md` | Setup documentation |
+   | Dotfiles and dot-directories | `.git/`, `.github/`, `.htaccess` sub-files |
+   | `*.md` files | Any Markdown documentation |
 
-2. **Root redirect** – a request to `https://playrealmforge.co.uk/` is
+3. **Root redirect** – a request to `https://playrealmforge.co.uk/` is
    automatically sent to `https://playrealmforge.co.uk/public/` where the game
    frontend lives.
 
@@ -276,8 +279,8 @@ automatically:
 
 ### Step 4 – Configure API Keys
 
-1. In **File Manager**, navigate to `/home/playrealm/public_html/` and open
-   `config.php` for editing.
+1. In **File Manager**, navigate to `/home/playrealm/` (your home directory, **not**
+   `public_html/`) and open `config.php` for editing.
 2. Replace the placeholder values with your real keys:
 
    ```php
@@ -301,8 +304,8 @@ automatically:
 
 5. **Save** the file.
 
-> **Security:** `config.php` is blocked by `.htaccess` so it cannot be
-> downloaded or read via HTTP even though it sits inside `public_html/`.
+> **Security:** `config.php` sits above `public_html/` and is therefore never
+> accessible via HTTP. It is included by PHP scripts using relative paths.
 
 ---
 
@@ -533,12 +536,13 @@ To enable it:
 
 ### Security Tips
 
-- **`.htaccess` blocks sensitive paths.** `config.php`, `engine/`, `database/`,
-  dotfiles, and documentation are all blocked from HTTP access by the root
-  `.htaccess`. Never delete or weaken these rules.
-- **Logs and world data live above `public_html/`.** `logs/` and `database/`
-  (containing `world.json`) are stored at `/home/playrealm/` — outside the web
-  root entirely — so they can never be reached via HTTP regardless of `.htaccess`.
+- **Sensitive files live above the web root.** `config.php` (API keys),
+  `engine/` (game logic), and `database/` (world data) are stored at
+  `/home/playrealm/` — outside `public_html/` entirely — so they can never be
+  reached via HTTP.
+- **`.htaccess` provides defence in depth.** Dotfiles (`.git/`, `.github/`) and
+  documentation (`*.md`) inside the web root are blocked by `.htaccess`. Never
+  delete or weaken these rules.
 - **Use HTTPS.** Enable a free SSL certificate via cPanel → *SSL/TLS Status*
   or *Let's Encrypt™* and force HTTPS in `.htaccess`.
 - **Restrict `admin/` access** to your own IP address if possible by adding
