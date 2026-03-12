@@ -63,6 +63,6 @@ are involved.
 1. Clone repo into `/home/playrealm` (the cPanel home directory – the repo structure mirrors the server paths, with `public_html/` as a subfolder)
 2. Configure `config.php` with the Groq API key
 3. `.cpanel.yml` creates `~/logs/` and `~/database/` above the web root on first deploy; ensure they are writable
-4. `public_html/.htaccess` blocks `config.php`, `engine/`, `database/`, dotfiles, and docs from HTTP access, and redirects `/` to `/public/`
+4. `config.php`, `engine/`, and `database/` sit above the web root and are never HTTP-accessible. `public_html/.htaccess` blocks dotfiles and docs. `public_html/index.php` redirects `/` to `/public/`
 5. Configure admin `.htpasswd` at `~/.htpassfiles/.htpasswd`
 6. Visit site – world auto-generates on first load

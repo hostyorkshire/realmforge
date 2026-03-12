@@ -100,6 +100,8 @@ every sensitive path inside the web root.
 ├── .github/workflows/
 │   └── deploy.yml             # GitHub Actions → cPanel auto-deploy
 ├── README.md
+├── DEPLOYMENT.md              # Deploy-key automation guide
+├── PROJECT_BRIEF.md           # Project overview / design brief
 ├── config.php                 # API keys & paths – above the web root, never HTTP-accessible
 │
 ├── engine/                    # PHP game engine – above the web root, never HTTP-accessible
@@ -111,6 +113,7 @@ every sensitive path inside the web root.
 │
 └── public_html/               ← Apache web root (https://playrealmforge.co.uk)
     ├── .htaccess              # Security rules – blocks dotfiles and documentation
+    ├── index.php              # Root redirect → /public/ (301)
     │
     ├── api/                   # JSON API endpoints (web-accessible PHP)
     │   ├── adventure.php      # Main game loop (action → AI narration)
@@ -195,8 +198,9 @@ Choose **one** of the three methods below.
    contents (`.cpanel.yml`, `.github/`, `public_html/`, etc.) one level up so
    they sit directly inside `/home/playrealm/`.
 6. The `public_html/` folder from the ZIP will merge with the existing
-   `/home/playrealm/public_html/` web root, placing `config.php`, `admin/`,
-   `api/`, etc. correctly inside the web root.
+   `/home/playrealm/public_html/` web root, placing `admin/`, `api/`, etc.
+   correctly inside the web root. `config.php`, `engine/`, and `database/`
+   remain at `/home/playrealm/` — above the web root — where they belong.
 
 #### Option B – cPanel Terminal / SSH
 
@@ -215,10 +219,10 @@ Upload the repository contents with an FTP client such as FileZilla:
 - **Host:** your server hostname (see cPanel → *FTP Accounts*)
 - **Remote path:** `/home/playrealm/` (your home directory)
 
-> **Tip:** Whichever method you use, the final result should have `config.php`,
-> `public/`, `api/`, `admin/`, etc. directly inside
-> `/home/playrealm/public_html/`, and `.cpanel.yml` directly inside
-> `/home/playrealm/`.
+> **Tip:** Whichever method you use, the final result should have
+> `config.php`, `engine/`, `database/`, and `.cpanel.yml` directly inside
+> `/home/playrealm/`, and `api/`, `admin/`, `public/`, etc. inside
+> `/home/playrealm/public_html/`.
 
 ---
 
@@ -257,9 +261,9 @@ defence in depth:
    | Dotfiles and dot-directories | `.git/`, `.github/`, `.htaccess` sub-files |
    | `*.md` files | Any Markdown documentation |
 
-3. **Root redirect** – a request to `https://playrealmforge.co.uk/` is
-   automatically sent to `https://playrealmforge.co.uk/public/` where the game
-   frontend lives.
+3. **Root redirect** – `public_html/index.php` issues a 301 redirect from
+   `https://playrealmforge.co.uk/` to `https://playrealmforge.co.uk/public/`
+   where the game frontend lives.
 
 > **Note:** `mod_rewrite` must be enabled on your host (it is on virtually all
 > cPanel / Apache servers). If the redirect does not work, confirm it is enabled
