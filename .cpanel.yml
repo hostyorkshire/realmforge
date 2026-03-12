@@ -3,18 +3,9 @@ deployment:
   tasks:
     # ── Runtime directories above public_html (not web-accessible) ─────────────
     - /bin/mkdir -p /home/playrealm/logs
-
-    # ── Image cache directories inside public_html (must be web-accessible) ────
-    - /bin/mkdir -p /home/playrealm/public_html/images/generated/scenes
-    - /bin/mkdir -p /home/playrealm/public_html/images/generated/npcs
-    - /bin/mkdir -p /home/playrealm/public_html/images/generated/monsters
-    - /bin/mkdir -p /home/playrealm/public_html/images/generated/items
-    - /bin/mkdir -p /home/playrealm/public_html/images/generated/towns
-    - /bin/mkdir -p /home/playrealm/public_html/images/generated/dungeons
-    - /bin/mkdir -p /home/playrealm/public_html/images/generated/maps
+    - /bin/mkdir -p /home/playrealm/database
 
     # ── Writable permissions ────────────────────────────────────────────────────
-    - /bin/chmod -R 755 /home/playrealm/public_html/images/generated
     - /bin/chmod -R 755 /home/playrealm/logs
     - /bin/chmod -R 755 /home/playrealm/database
 

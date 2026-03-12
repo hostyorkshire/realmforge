@@ -22,7 +22,6 @@ foreach ($logFiles as $label => $path) {
 }
 
 $worldExists = file_exists(WORLD_FILE);
-$imageCount  = count(glob(IMAGES_PATH . '/**/*.png', GLOB_BRACE) ?: []);
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -70,8 +69,8 @@ $imageCount  = count(glob(IMAGES_PATH . '/**/*.png', GLOB_BRACE) ?: []);
       <div class="value"><?= $worldExists ? '✓' : '✗' ?></div>
     </div>
     <div class="card">
-      <h3>Cached Images</h3>
-      <div class="value"><?= $imageCount ?></div>
+      <h3>Image Generation</h3>
+      <div class="value" style="font-size:1rem;color:#5ec97c;">Canvas</div>
     </div>
     <?php foreach ($logCounts as $label => $count): ?>
     <div class="card">
@@ -92,23 +91,14 @@ $imageCount  = count(glob(IMAGES_PATH . '/**/*.png', GLOB_BRACE) ?: []);
       </span></td>
     </tr>
     <tr>
-      <td>Stable Diffusion Key</td>
-      <td><?= STABLE_DIFFUSION_API_KEY === 'your-stable-diffusion-api-key-here' ? '<em>Not set</em>' : '•••••••' ?></td>
-      <td><span class="badge <?= STABLE_DIFFUSION_API_KEY !== 'your-stable-diffusion-api-key-here' ? 'ok' : 'warn' ?>">
-        <?= STABLE_DIFFUSION_API_KEY !== 'your-stable-diffusion-api-key-here' ? 'Set' : 'Missing' ?>
-      </span></td>
+      <td>Image Generation</td>
+      <td>HTML5 Canvas (browser-side)</td>
+      <td><span class="badge ok">Active</span></td>
     </tr>
     <tr>
       <td>Groq Model</td>
       <td><?= htmlspecialchars(GROQ_MODEL) ?></td>
       <td><span class="badge ok">OK</span></td>
-    </tr>
-    <tr>
-      <td>Images Directory</td>
-      <td><?= htmlspecialchars(IMAGES_PATH) ?></td>
-      <td><span class="badge <?= is_writable(IMAGES_PATH) ? 'ok' : 'warn' ?>">
-        <?= is_writable(IMAGES_PATH) ? 'Writable' : 'Not writable' ?>
-      </span></td>
     </tr>
   </table>
 </body>

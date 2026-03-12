@@ -11,16 +11,11 @@ define('GROQ_API_KEY', getenv('GROQ_API_KEY') ?: 'your-groq-api-key-here');
 define('GROQ_ENDPOINT', 'https://api.groq.com/openai/v1/chat/completions');
 define('GROQ_MODEL', 'llama-3.1-8b-instant');
 
-// Stable Diffusion API
-define('STABLE_DIFFUSION_API_KEY', getenv('STABLE_DIFFUSION_API_KEY') ?: 'your-stable-diffusion-api-key-here');
-define('STABLE_DIFFUSION_ENDPOINT', 'https://api.stability.ai/v2beta/stable-image/generate/core');
-
 // Paths
 // BASE_PATH   = /home/playrealm                  (repo root, one level above public_html)
 // PUBLIC_PATH = /home/playrealm/public_html      (the web root)
 define('BASE_PATH',    dirname(__FILE__));
 define('PUBLIC_PATH',  BASE_PATH . '/public_html');
-define('IMAGES_PATH',  PUBLIC_PATH . '/images/generated');  // inside public_html – web-accessible
 define('LOGS_PATH',    BASE_PATH  . '/logs');               // above public_html – not web-accessible
 define('DATABASE_PATH', BASE_PATH . '/database');           // above public_html – not web-accessible
 
