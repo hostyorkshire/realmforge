@@ -28,13 +28,9 @@
     <!-- Left: Scene + Story + Choices -->
     <section class="main-panel">
 
-      <!-- Scene Image -->
+      <!-- Scene Image (HTML5 Canvas – generated in browser) -->
       <div class="scene-container" id="sceneContainer">
-        <div class="scene-placeholder" id="scenePlaceholder">
-          <span class="scene-icon">🏰</span>
-          <p>Your adventure begins…</p>
-        </div>
-        <img id="sceneImage" class="scene-image hidden" src="" alt="Scene" />
+        <canvas id="sceneCanvas" class="scene-image" width="800" height="300" aria-label="Procedurally generated scene illustration"></canvas>
         <div class="scene-overlay" id="sceneOverlay"></div>
       </div>
 

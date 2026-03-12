@@ -26,7 +26,7 @@ At the bottom of every scene you will find **three AI-suggested actions** tailor
 
 ### 3. The Story Unfolds
 
-After you act, the game engine processes your choice and the **Groq AI** (llama-3.1-8b-instant) writes the next 80–120 word story beat—describing exactly what happens as a result. Simultaneously, **Stable Diffusion** generates a unique piece of scene art to match: landscapes, dungeon chambers, NPC portraits, monster encounters, and more. Images are cached so repeated visits to the same location feel consistent.
+After you act, the game engine processes your choice and the **Groq AI** (llama-3.1-8b-instant) writes the next 80–120 word story beat—describing exactly what happens as a result. Simultaneously, the browser draws a unique scene illustration using **HTML5 Canvas**: landscapes, dungeon chambers, town scenes, and more—generated instantly, with no server round-trip required.
 
 ### 4. Core Gameplay Loop
 
@@ -35,7 +35,7 @@ After you act, the game engine processes your choice and the **Groq AI** (llama-
 | **Scene** | AI narration describes where you are and what is happening |
 | **Choice** | Pick an AI-suggested action or type your own command |
 | **Resolution** | The engine resolves combat (dice-based), dialogue, or exploration |
-| **Art** | Stable Diffusion generates scene art for the new beat |
+| **Art** | HTML5 Canvas draws a procedural scene illustration in the browser |
 | **State update** | Your health, gold, inventory, quest progress, and reputation are updated |
 | **Next scene** | The AI narrates the outcome and presents three new choices |
 
@@ -59,7 +59,7 @@ If you are hosting your own RealmForge installation, the **admin dashboard** at 
 
 - Monitor AI logs and player action history
 - Browse and edit quests, NPCs, factions, and world lore
-- Manage the Stable Diffusion image cache
+- View image-generation info (canvas-based, no cache to manage)
 - View or regenerate the entire world
 
 The dashboard is password-protected and intended for the host/GM, not players. See the [Deployment](#deployment-cpanel-shared-hosting) section for setup details.
@@ -70,13 +70,13 @@ The dashboard is password-protected and intended for the host/GM, not players. S
 
 - **AI-Narrated Adventure** – The Groq API (llama-3.1-8b-instant) generates atmospheric 80–120 word story beats in response to player actions.
 - **Procedural World** – A 50×50 tile continent with kingdoms, towns, dungeons, roads, and biomes generated on first launch.
-- **Image Generation** – Stable Diffusion generates scene art, NPC portraits, monsters, items, and maps; all cached locally.
+- **Canvas Scene Illustrations** – Each story beat instantly renders a procedural scene illustration in the browser using HTML5 Canvas; no server-side image API or cache required.
 - **Player Interaction** – Choose from 3 AI-suggested actions *or* type any free-text command (max 200 chars).
 - **Inventory & Combat** – Dice-based combat, loot drops, and a full item inventory system.
 - **Quest System** – Multi-faction quest chains with gold and item rewards.
 - **Faction Reputation** – Five factions; player actions adjust standing, unlocking discounts and quests.
 - **Story Memory Compression** – Older events are summarised by the AI to prevent token overflow.
-- **Admin Dashboard** – View logs, manage quests/NPCs/factions/lore, clear image cache, and regenerate the world.
+- **Admin Dashboard** – View logs, manage quests/NPCs/factions/lore, and regenerate the world.
 - **cPanel Compatible** – Pure PHP 8+ with no Composer dependencies; runs on standard Apache shared hosting.
 
 ---
@@ -114,7 +114,7 @@ every sensitive path inside the web root.
     │
     ├── api/                   # JSON API endpoints (web-accessible PHP)
     │   ├── adventure.php      # Main game loop (action → AI narration)
-    │   ├── generateImage.php  # Image generation with caching
+    │   ├── generateImage.php  # Canvas stub (returns {canvas:true}; images drawn in browser)
     │   ├── npcDialogue.php    # Contextual NPC conversation
     │   ├── compressMemory.php # Story memory compression
     │   ├── generateDungeon.php# Procedural dungeon rooms
@@ -129,14 +129,7 @@ every sensitive path inside the web root.
     │   ├── .htaccess
     │   └── *.php
     │
-    └── images/generated/      # Stable Diffusion cache – web-accessible
-        ├── scenes/
-        ├── npcs/
-        ├── monsters/
-        ├── items/
-        ├── towns/
-        ├── dungeons/
-        └── maps/
+    └── images/                # Static assets only (no generated image cache)
 
 NOTE: The logs/ directory is created automatically by .cpanel.yml on
 first deploy. It lives above public_html and is never web-accessible:
@@ -154,13 +147,10 @@ first deploy. It lives above public_html and is never web-accessible:
 2. Generate an API key.
 3. Set `GROQ_API_KEY` in `config.php` (or as a server environment variable).
 
-### Stable Diffusion (Stability AI)
-
-1. Create an account at [platform.stability.ai](https://platform.stability.ai).
-2. Generate an API key.
-3. Set `STABLE_DIFFUSION_API_KEY` in `config.php`.
-
 > **Security:** Never expose API keys in frontend JavaScript. All API calls are server-side only.
+
+> **Note:** No image-generation API key is required. Scene illustrations are rendered
+> entirely in the browser via HTML5 Canvas.
 
 ---
 
@@ -238,7 +228,7 @@ Upload the repository contents with an FTP client such as FileZilla:
 2. Locate your domain in the list and set the PHP version to **8.0** or higher.
 3. If your host offers a **PHP Extensions** page, confirm that the **curl** extension is enabled.
 
-> **Why curl?** RealmForge calls the Groq and Stability AI APIs from the server
+> **Why curl?** RealmForge calls the Groq API from the server
 > side using PHP's `curl_*` functions.
 
 ---
@@ -281,11 +271,10 @@ defence in depth:
 
 1. In **File Manager**, navigate to `/home/playrealm/` (your home directory, **not**
    `public_html/`) and open `config.php` for editing.
-2. Replace the placeholder values with your real keys:
+2. Replace the placeholder value with your real key:
 
    ```php
    define('GROQ_API_KEY', 'gsk_YourActualGroqKeyHere');
-   define('STABLE_DIFFUSION_API_KEY', 'sk-YourActualStabilityKeyHere');
    ```
 
 3. While you're in the file, change the default admin credentials:
@@ -311,19 +300,12 @@ defence in depth:
 
 ### Step 5 – Set Directory Permissions
 
-RealmForge writes AI-generated images at runtime. Log files and world data are
-stored **above** `public_html/` so they are never reachable via HTTP.
-
-**Via cPanel File Manager:**
-
-1. Navigate to `/home/playrealm/public_html/images/`.
-2. Right-click the `generated` folder → **Change Permissions** → set to
-   **`0755`** → check **Recurse into subdirectories**.
+RealmForge writes log files and world data at runtime. These are stored
+**above** `public_html/` so they are never reachable via HTTP.
 
 **Via Terminal:**
 
 ```bash
-chmod -R 755 ~/public_html/images/generated/
 chmod -R 755 ~/logs/
 chmod -R 755 ~/database/
 ```
@@ -336,10 +318,6 @@ chmod -R 755 ~/database/
 > mkdir -p ~/logs ~/database
 > chmod 755 ~/logs ~/database
 > ```
-
-> **Tip:** Some hosts run PHP via CGI/FastCGI under your own user account, so
-> `755` is sufficient. If images still fail to save, try `775`. Avoid `777` in
-> production.
 
 ---
 
@@ -410,7 +388,7 @@ database-backed save games:
 1. **Visit your domain** (e.g. `https://playrealmforge.co.uk`).
    - You should see the RealmForge game interface with the "Your adventure begins…" placeholder.
 2. **Click an action** or type a custom command. If Groq is configured correctly you will receive an AI-narrated response within a few seconds.
-3. **Check image generation.** Scene art should appear above the story text after a short delay. If it does not, verify your Stability AI key and that `images/generated/` is writable.
+3. **Check scene illustrations.** A procedural canvas illustration should appear above the story text instantly after each action. If it does not appear, open the browser console (F12) and check for JavaScript errors.
 4. On **first load** the world is automatically generated and saved to `database/world.json`. This may take a moment.
 5. **Visit the admin dashboard** at `https://playrealmforge.co.uk/admin/dashboard.php` and log in with the credentials you configured.
 
@@ -529,10 +507,10 @@ To enable it:
 | **500 Internal Server Error** | PHP version too low or `mod_rewrite` disabled | Set PHP to 8.0+ in *MultiPHP Manager*; check `.htaccess` syntax |
 | **Blank page / white screen** | PHP fatal error hidden by `display_errors 0` | Check `/home/playrealm/logs/errors.log` or temporarily set `display_errors` to `1` in `config.php` |
 | **"Failed to connect to api.groq.com"** | `curl` extension not enabled | Enable `curl` in *Select PHP Version* → *Extensions* |
-| **Images not appearing** | `images/generated/` not writable | Re-check permissions (step 5); look for errors in `/home/playrealm/logs/errors.log` |
+| **Images not appearing** | Browser canvas rendering error | Open the browser console (F12) for any JavaScript errors |
 | **Admin page shows "401 Unauthorized"** | `.htpasswd` path wrong in `admin/.htaccess` | Run `realpath ~/.htpassfiles/.htpasswd` in Terminal to get the correct absolute path |
 | **World not generating** | `/home/playrealm/database/` not writable or missing | `mkdir -p ~/database && chmod 755 ~/database` |
-| **API rate-limit errors** | Too many requests to Groq / Stability AI | Wait a minute and try again; check your plan's rate limits |
+| **API rate-limit errors** | Too many requests to Groq | Wait a minute and try again; check your plan's rate limits |
 
 ### Security Tips
 
@@ -560,10 +538,10 @@ Access the admin area at `https://playrealmforge.co.uk/admin/dashboard.php`.
 Protected by HTTP Basic Authentication (configure via `admin/.htaccess`).
 
 Features:
-- System overview (API key status, writable directories, log counts)
+- System overview (API key status, log counts)
 - Log viewer with clear functionality
 - Quest, NPC, faction, and lore browsers
-- Image cache manager
+- Image generation info (HTML5 Canvas, no cache to manage)
 - World viewer and regeneration
 
 ---
@@ -575,8 +553,6 @@ Features:
 | `GROQ_API_KEY` | Your Groq API key |
 | `GROQ_ENDPOINT` | Groq completions endpoint |
 | `GROQ_MODEL` | `llama-3.1-8b-instant` |
-| `STABLE_DIFFUSION_API_KEY` | Your Stability AI API key |
-| `STABLE_DIFFUSION_ENDPOINT` | Stability AI generation endpoint |
 | `WORLD_GRID_SIZE` | World tile grid size (50×50) |
 | `MAX_HISTORY_EVENTS` | Events stored before compression (5) |
 | `STORY_MIN_WORDS` | Minimum narrative length (80) |
@@ -591,7 +567,7 @@ Features:
 | Backend | PHP 8+, Apache |
 | Frontend | HTML5, CSS3, Vanilla JS |
 | AI Narration | Groq API (llama-3.1-8b-instant) |
-| Image Generation | Stability AI (Stable Diffusion) |
+| Image Generation | HTML5 Canvas (browser-side, procedural) |
 | Database (optional) | MySQL / MariaDB |
 | Hosting | cPanel shared hosting |
 

@@ -7,7 +7,7 @@ RealmForge – AI Cinematic Adventure RPG
 https://playrealmforge.co.uk
 
 ## Overview
-RealmForge is a browser-based fantasy RPG where an AI Game Master narrates dynamic adventures while a backend game engine enforces gameplay mechanics. Players explore a procedurally generated world containing towns, NPC characters, monsters, factions, quests, items, procedural dungeons, kingdoms, roads, and wilderness. Story narration is generated using the Groq API. Images are generated using Stable Diffusion and cached locally.
+RealmForge is a browser-based fantasy RPG where an AI Game Master narrates dynamic adventures while a backend game engine enforces gameplay mechanics. Players explore a procedurally generated world containing towns, NPC characters, monsters, factions, quests, items, procedural dungeons, kingdoms, roads, and wilderness. Story narration is generated using the Groq API. Scene illustrations are generated in the browser using HTML5 Canvas — no server-side image API is required.
 
 ## Tech Stack
 
@@ -16,15 +16,15 @@ RealmForge is a browser-based fantasy RPG where an AI Game Master narrates dynam
 | Backend | PHP 8+, Apache (cPanel) |
 | Frontend | HTML5, CSS3, Vanilla JavaScript |
 | AI Narration | Groq API – llama-3.1-8b-instant |
-| Image Generation | Stable Diffusion API |
+| Image Generation | HTML5 Canvas (browser-side, procedural) |
 | Database (optional) | MySQL |
 
 ## Core Gameplay Loop
-1. Player sees a scene image and AI-narrated story (80–120 words)
+1. Player sees a canvas-rendered scene illustration and AI-narrated story (80–120 words)
 2. Player chooses one of 3 suggested actions OR types a custom command
 3. Backend processes the action (combat, exploration, dialogue, etc.)
 4. Groq generates the next story beat and 3 new choices
-5. Stable Diffusion generates a scene image (cached by prompt hash)
+5. Browser draws a new procedural scene illustration on `<canvas>` using the current location context
 6. Player state (location, health, gold, inventory, quests, reputation) persists
 
 ## World Structure
@@ -46,10 +46,12 @@ The AI Game Master:
 - Older events are summarised via Groq and stored in `story_summary`
 - Prevents AI token overflow on long sessions
 
-## Image Caching
-- Before generation: hash the prompt with MD5
-- If `images/generated/{type}/{hash}.png` exists: return it
-- Otherwise: call Stable Diffusion API, save result, return URL
+## Image Generation
+Scene illustrations are generated entirely in the browser using HTML5 Canvas.
+The JavaScript function `drawSceneCanvas()` in `public/app.js` renders a
+procedural scene (wilderness, town, or dungeon) based on the player's current
+location and last action. No server-side image generation, API keys, or caching
+are involved.
 
 ## Security
 - API keys stored only in `config.php` (server-side)
@@ -59,9 +61,8 @@ The AI Game Master:
 
 ## Deployment
 1. Clone repo into `/home/playrealm` (the cPanel home directory – the repo structure mirrors the server paths, with `public_html/` as a subfolder)
-2. Configure `public_html/config.php` with real API keys
+2. Configure `config.php` with the Groq API key
 3. `.cpanel.yml` creates `~/logs/` and `~/database/` above the web root on first deploy; ensure they are writable
-4. `public_html/images/generated/` is created inside `public_html/` and is web-accessible for serving scene art
-5. `public_html/.htaccess` blocks `config.php`, `engine/`, `database/`, dotfiles, and docs from HTTP access, and redirects `/` to `/public/`
-6. Configure admin `.htpasswd` at `~/.htpassfiles/.htpasswd`
-7. Visit site – world auto-generates on first load
+4. `public_html/.htaccess` blocks `config.php`, `engine/`, `database/`, dotfiles, and docs from HTTP access, and redirects `/` to `/public/`
+5. Configure admin `.htpasswd` at `~/.htpassfiles/.htpasswd`
+6. Visit site – world auto-generates on first load
