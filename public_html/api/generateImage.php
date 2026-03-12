@@ -111,10 +111,18 @@ function findCachedImage(string $cacheKey, string $subDir): ?string {
  * @return string|null Raw image binary data.
  */
 function callStableDiffusionApi(string $prompt): ?string {
-    $payload = http_build_query([
-        'prompt'      => $prompt,
+    if ($prompt === '') {
+        $errorEntry = date('c') . " | SD API Error: empty prompt supplied\n";
+        file_put_contents(LOGS_PATH . '/errors.log', $errorEntry, FILE_APPEND | LOCK_EX);
+        return null;
+    }
+
+    // The Stability AI core endpoint requires multipart/form-data.
+    // Passing an array to CURLOPT_POSTFIELDS makes curl send it that way automatically.
+    $payload = [
+        'prompt'        => $prompt,
         'output_format' => 'png',
-    ]);
+    ];
 
     $ch = curl_init(STABLE_DIFFUSION_ENDPOINT);
     curl_setopt_array($ch, [
@@ -140,7 +148,7 @@ function callStableDiffusionApi(string $prompt): ?string {
     curl_close($ch);
 
     if ($httpCode !== 200) {
-        $errorEntry = date('c') . " | SD API Error: HTTP {$httpCode}\n";
+        $errorEntry = date('c') . " | SD API Error: HTTP {$httpCode} | response: " . substr($response, 0, 500) . "\n";
         file_put_contents(LOGS_PATH . '/errors.log', $errorEntry, FILE_APPEND | LOCK_EX);
         return null;
     }
