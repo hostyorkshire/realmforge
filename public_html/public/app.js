@@ -290,8 +290,9 @@ function drawMap() {
 
 function clientSelectBiome(x, y, size) {
   // Large prime multipliers matching server-side continentGenerator.php for deterministic output
-  const hash = Math.abs(((x * 374761393) + (y * 668265263)) | 0) >>> 0;
-  const normalized = hash / 0xFFFFFFFF;
+  // Use modulo 0x80000000 to replicate PHP's & 0x7FFFFFFF on 64-bit integers
+  const hash = ((x * 374761393) + (y * 668265263)) % 0x80000000;
+  const normalized = hash / 0x7FFFFFFF;
 
   if (x < 3 || x > size - 4 || y < 3 || y > size - 4) return 'coast';
   if (y < size * 0.2) return normalized < 0.6 ? 'mountains' : 'forest';

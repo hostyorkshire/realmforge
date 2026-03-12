@@ -130,9 +130,16 @@ function callStableDiffusionApi(string $prompt): ?string {
 
     $response = curl_exec($ch);
     $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    if ($response === false) {
+        $error = curl_error($ch);
+        curl_close($ch);
+        $errorEntry = date('c') . " | SD API curl error: {$error}\n";
+        file_put_contents(LOGS_PATH . '/errors.log', $errorEntry, FILE_APPEND | LOCK_EX);
+        return null;
+    }
     curl_close($ch);
 
-    if ($httpCode !== 200 || !$response) {
+    if ($httpCode !== 200) {
         $errorEntry = date('c') . " | SD API Error: HTTP {$httpCode}\n";
         file_put_contents(LOGS_PATH . '/errors.log', $errorEntry, FILE_APPEND | LOCK_EX);
         return null;

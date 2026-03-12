@@ -41,4 +41,7 @@ define('ADMIN_PASS', 'changeme');
 error_reporting(E_ALL);
 ini_set('display_errors', 0);
 ini_set('log_errors', 1);
+if (!is_dir(LOGS_PATH)) {
+    mkdir(LOGS_PATH, 0755, true);
+}
 ini_set('error_log', LOGS_PATH . '/errors.log');

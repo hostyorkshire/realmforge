@@ -83,9 +83,15 @@ function callGroqDialogue(string $systemPrompt, string $userPrompt): ?string {
 
     $response = curl_exec($ch);
     $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    if ($response === false) {
+        $error = curl_error($ch);
+        curl_close($ch);
+        error_log('Groq NPC dialogue curl error: ' . $error);
+        return null;
+    }
     curl_close($ch);
 
-    if ($httpCode !== 200 || !$response) {
+    if ($httpCode !== 200) {
         return null;
     }
 
