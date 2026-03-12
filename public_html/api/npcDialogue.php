@@ -57,6 +57,10 @@ echo json_encode([
 
 /**
  * Call Groq for NPC dialogue generation.
+ *
+ * @param string $systemPrompt System context for the NPC.
+ * @param string $userPrompt   Player's input message.
+ * @return string|null Generated dialogue or null on failure.
  */
 function callGroqDialogue(string $systemPrompt, string $userPrompt): ?string {
     $payload = json_encode([
