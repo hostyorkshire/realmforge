@@ -49,11 +49,18 @@
         </div>
       </div>
 
-      <!-- Choice Buttons -->
-      <div class="choices-panel" id="choicesPanel">
-        <button class="choice-btn" data-choice="0" id="choice0">Enter the village</button>
-        <button class="choice-btn" data-choice="1" id="choice1">Look around the area</button>
-        <button class="choice-btn" data-choice="2" id="choice2">Rest by the roadside</button>
+      <!-- Choice Buttons + TTS Controls -->
+      <!-- tts-controls sits to the left of the three choices; remove this div to remove TTS -->
+      <div class="choices-row">
+        <div class="tts-controls" id="ttsControls">
+          <button class="tts-btn" id="ttsPlay" aria-label="Read story aloud" title="Read story aloud">🔊</button>
+          <button class="tts-btn" id="ttsStop" aria-label="Stop reading" title="Stop reading" disabled>⏹️</button>
+        </div>
+        <div class="choices-panel" id="choicesPanel">
+          <button class="choice-btn" data-choice="0" id="choice0">Enter the village</button>
+          <button class="choice-btn" data-choice="1" id="choice1">Look around the area</button>
+          <button class="choice-btn" data-choice="2" id="choice2">Rest by the roadside</button>
+        </div>
       </div>
 
       <!-- Custom Command -->
