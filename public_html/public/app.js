@@ -386,3 +386,53 @@ function loadState() {
     return null;
   }
 }
+
+// ── Text-to-Speech (TTS) ──────────────────────────────────────────────────────
+// Uses the browser-native Web Speech API — free, no third-party services needed.
+// Reads only the story narrative (#storyText) and the three choice button labels.
+// To remove this feature: delete this block and the ttsControls markup in index.html.
+
+(function initTTS() {
+  const playBtn = document.getElementById('ttsPlay');
+  const stopBtn = document.getElementById('ttsStop');
+
+  // Hide controls if the browser does not support the Web Speech API
+  if (!('speechSynthesis' in window)) {
+    const wrap = document.getElementById('ttsControls');
+    if (wrap) wrap.style.display = 'none';
+    return;
+  }
+
+  /** Collect readable text: story narrative then the three choice labels. */
+  function buildReadText() {
+    const storyEl = document.getElementById('storyText');
+    const storyPart = storyEl ? storyEl.innerText.trim() : '';
+    const choiceBtns = document.querySelectorAll('#choicesPanel .choice-btn');
+    const choicePart = Array.from(choiceBtns)
+      .map((btn, i) => `Option ${i + 1}: ${btn.textContent.trim()}`)
+      .join('. ');
+    return storyPart
+      ? `${storyPart}. Your choices are: ${choicePart}`
+      : choicePart;
+  }
+
+  function resetButtons() {
+    playBtn.disabled = false;
+    stopBtn.disabled = true;
+  }
+
+  playBtn.addEventListener('click', () => {
+    speechSynthesis.cancel();
+    const utterance = new SpeechSynthesisUtterance(buildReadText());
+    utterance.onend  = resetButtons;
+    utterance.onerror = resetButtons;
+    playBtn.disabled = true;
+    stopBtn.disabled = false;
+    speechSynthesis.speak(utterance);
+  });
+
+  stopBtn.addEventListener('click', () => {
+    speechSynthesis.cancel();
+    resetButtons();
+  });
+}());

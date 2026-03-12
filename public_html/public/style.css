@@ -156,15 +156,26 @@ a:hover { text-decoration: underline; }
 }
 
 /* ── Choices ─────────────────────────────────────────────────────────────────── */
-.choices-panel {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
+
+/* Outer row: TTS controls on the left, choice buttons filling the rest */
+.choices-row {
+  display: flex;
   gap: 0.75rem;
+  align-items: stretch;
   margin-top: 1rem;
 }
 
+.choices-panel {
+  flex: 1;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.75rem;
+}
+
 @media (max-width: 640px) {
-  .choices-panel { grid-template-columns: 1fr; }
+  .choices-row    { flex-direction: column; }
+  .tts-controls   { flex-direction: row; }
+  .choices-panel  { grid-template-columns: 1fr; }
 }
 
 .choice-btn {
@@ -187,6 +198,38 @@ a:hover { text-decoration: underline; }
 
 .choice-btn:disabled {
   opacity: 0.45;
+  cursor: not-allowed;
+}
+
+/* ── TTS (Text-to-Speech) Buttons ───────────────────────────────────────────── */
+/* Vertically stacked Play / Stop buttons shown to the left of the choice buttons */
+.tts-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.tts-btn {
+  background: var(--bg-panel-alt);
+  color: var(--color-secondary);
+  border: 1px solid var(--color-secondary);
+  border-radius: var(--radius);
+  padding: 0.6rem 0.65rem;
+  font-size: 1.15rem;
+  line-height: 1;
+  cursor: pointer;
+  transition: background var(--transition), box-shadow var(--transition);
+}
+
+.tts-btn:hover:not(:disabled) {
+  background: rgba(106,176,243,0.15);
+  box-shadow: 0 0 10px rgba(106,176,243,0.3);
+}
+
+.tts-btn:disabled {
+  opacity: 0.4;
   cursor: not-allowed;
 }
 
